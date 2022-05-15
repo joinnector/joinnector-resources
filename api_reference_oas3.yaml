@@ -1,0 +1,1405 @@
+openapi: 3.0.0
+info:
+  title: API reference
+  description: |-
+    An almost zero code reward solution for SMBs and Startups. We help businesses launch rewards & loyalty solution for their app or website.
+
+        - Always use the basicAuth when calling API from your backend system (basicAuth omits the callback webhook checks) (never reveal your API secret)
+        - basicAuth should be "apikey:apisecret"
+        - For making calls from frontend create a read-only API key (read-only API key can only be used for fetching resourses) (never reveal your API secret)
+        - If API key not read-only it should only be used from backend system, else to secure the API calls create a callback webhook on your server and pass the url of that while creating the API key
+        - Params are path variables
+        - Each body/query/path param has a type, for ex (uuid, string..)
+        - Lead means merchant's user.
+
+    Click on export and copy-paste the openapi 3.0 spec inside postman. Get started by creating an account on https://merchant.nector.io
+  contact:
+    name: joinnector
+    url: https://nector.io
+    email: product@nector.io
+  version: 2.0.0
+servers:
+  - url: https://platform.nector.io/api/v2/merchant
+
+components:
+  schemas:
+    success:
+      title: success
+      required:
+        - meta
+        - data
+      type: object
+      properties:
+        meta:
+          type: object
+        data:
+          type: object
+      example:
+        meta: {}
+        data: {}
+
+    error:
+      title: error
+      required:
+        - meta
+        - data
+      type: object
+      properties:
+        meta:
+          type: object
+        data:
+          type: object
+      example:
+        meta: {}
+        data: {}
+
+    merchant_create_triggeractivities:
+      title: merchant_create_triggeractivities
+      required:
+        - trigger_id
+      type: object
+      properties:
+        trigger_id:
+          type: string
+          description: (Required) (This needs to be triggers _id value)
+        lead_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        referral_code:
+          type: string
+          description: (Minimum length is 1) (Maximum length is 128) (If user does not exists it will get created with passed referral_code value else a random 8-16 digit referral_code will be generated for this user)
+        referred_by_referral_code:
+          type: string
+          description: (Minimum length is 1) (Maximum length is 128) (This needs to be other leads referral_code value) (If user does not exists and referred_by_referral_code then referral based reward system will reward both the user)
+        name:
+          type: string
+          description: (This is name of this user)
+        badge:
+          type: string
+          description: (This can only be one of gold,silver,bronze,diamond,platinum) (If user does not exists it will get created with passed badge value)
+        metadetail:
+          $ref: "#/components/schemas/triggeractivity_metadetail"
+        trace:
+          $ref: "#/components/schemas/triggeractivity_trace"
+
+      example:
+        trigger_id: <uuid> (Required) (This needs to be triggers _id value)
+        lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        referral_code: <string> (Minimum length is 1) (Maximum length is 128) (If user does not exists it will get created with passed referral_code value else a random 8 digit referral_code will be generated for this user)
+        referred_by_referral_code: <string> (Minimum length is 1) (Maximum length is 128) (This needs to be other leads referral_code value) (If user does not exists and referred_by_referral_code then referral based reward system will reward both the user)
+        name: <string> (This is name of this user)
+        badge: <string> (This can only be one of gold,silver,bronze,diamond,platinum)
+        metadetail:
+          email: <string> (This needs to be valid email)
+          mobile:
+            mobile_code: <string> (Required) (This can be only one of 91,1,974)
+            mobile: <string> (Required) (Minimum length is 4) (Maximum length is 12)
+          gender: <string> (This can only be one of male,female,other)
+          dob: <string> (This needs to be ISO format date only)
+          country: <string> (This can only be one of ind,usa,qat)
+        trace:
+          params_for_on_activity_amount_reached_rule:
+            activity_amount: 0
+          params_for_emailtool:
+            email_body:
+              anykey: (Anything that needs to be passed as data to email template)
+          via_api_for_wallet:
+            title: <string> (Any string that needs to be passed as a title) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+            description: <string> (Any string that needs to be passed as a description) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+            operation: <string> (This can only be one of cr,dr) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+            point_range:
+              min: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+              max: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+          via_api_for_deal:
+            deal_id: <uuid> (This needs to be deals _id value) (This will be ignored if the trigger is not of type deal reward or value override is not allowed)
+            category_range: []
+            country_range: []
+            price_range:
+              min: <number> (This is deal coin amount range) (This will be ignored if the trigger is not of type deal reward or value override is not allowed)
+              max: <number> (This is deal coin amount range) (This will be ignored if the trigger is not of type deal reward or value override is not allowed)
+          via_api_for_discount:
+            discount_id: <uuid> (This needs to be discounts _id value) (This will be ignored if the trigger is not of type discount reward or value override is not allowed)
+            category_range: []
+            country_range: []
+            price_range:
+              min: <number> (This is discount coin amount range) (This will be ignored if the trigger is not of type discount reward or value override is not allowed)
+              max: <number> (This is discount coin amount range) (This will be ignored if the trigger is not of type discount reward or value override is not allowed)
+          via_api_for_callback:
+            uri: <string> (This is the callback uri) (This will be ignored if the trigger is not of type callback reward or value override is not allowed)
+          via_api_for_emailtool:
+            subject: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+            emailtype: (This can only be one of transactional,marketing) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+            emailtemplate_id: (This needs to be emailtemplates _id value) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+
+    merchant_create_dealredeems:
+      title: merchant_create_dealredeems
+      required:
+        - deal_id
+      type: object
+      properties:
+        deal_id:
+          type: string
+          description: (Required) (This needs to be deals _id value)
+        lead_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+      example:
+        deal_id: <uuid> (Required) (This needs to be deals _id value)
+        lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+
+    merchant_create_discountredeems:
+      title: merchant_create_discountredeems
+      required:
+        - discount_id
+      type: object
+      properties:
+        discount_id:
+          type: string
+          description: (Required) (This needs to be discounts _id value)
+        lead_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        amount:
+          type: number
+          description: (This is the variable reward amount) (Will be ignored if discount is of type fixed_percent or not marked as multiplier) (Maximum is 10X)
+      example:
+        discount_id: <uuid> (Required) (This needs to be discounts _id value)
+        lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        amount: 0
+
+    merchant_create_leads:
+      title: merchant_create_leads
+      required:
+        - customer_id
+      type: object
+      properties:
+        referral_code:
+          type: string
+          description: (Minimum length is 1) (Maximum length is 128) (Lead will be created with this referral_code if passed, else 8 digit referral_code will be generated on lead creation)
+        customer_id:
+          type: string
+          description: (Required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        referred_by_referral_code:
+          type: string
+          description: (Minimum length is 1) (Maximum length is 128) (This needs to be other leads referral_code value)
+        name:
+          type: string
+          description: (This is name of this user)
+        badge:
+          type: string
+          description: (This can only be one of gold,silver,bronze,diamond,platinum)
+        metadetail:
+          $ref: "#/components/schemas/triggeractivity_metadetail"
+
+      example:
+        referral_code: <string> (Minimum length is 1) (Maximum length is 128) (Lead will be created with this referral_code if passed, else 8 digit referral_code will be generated on lead creation)
+        customer_id: <string> (Required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        referred_by_referral_code: <string> (Minimum length is 1) (Maximum length is 128) (This needs to be other leads referral_code value)
+        name: <string> (This is name of this user)
+        badge: <string> (This can only be one of gold,silver,bronze,diamond,platinum)
+        metadetail:
+          email: <string> (This needs to be valid email)
+          mobile:
+            mobile_code: <string> (Required) (This can be only one of 91,1,974)
+            mobile: <string> (Required) (Minimum length is 4) (Maximum length is 12)
+          gender: <string> (This can only be one of male,female,other)
+          dob: <string> (This needs to be ISO format date only)
+          country: <string> (This can only be one of ind,usa,qat)
+
+    merchant_update_leads:
+      title: merchant_update_leads
+      type: object
+      properties:
+        name:
+          type: string
+          description: (This is name of this user)
+        badge:
+          type: string
+          description: (This can only be one of gold,silver,bronze,diamond,platinum)
+        email:
+          type: string
+          description: (This needs to be valid email)
+        mobile:
+          $ref: "#/components/schemas/lead_mobile"
+        gender:
+          type: string
+          description: (This can only be one of male,female,other)
+        dob:
+          type: string
+          description: (This needs to be ISO format date only)
+        country:
+          type: string
+          description: (This can only be one of ind,usa,qat)
+
+      example:
+        name: <string> (This is name of this user)
+        badge: <string> (This can only be one of gold,silver,bronze,diamond,platinum)
+        email: <string> (This needs to be valid email)
+        mobile:
+          mobile_code: <string> (Required) (This can be only one of 91,1,974)
+          mobile: <string> (Required) (Minimum length is 4) (Maximum length is 12)
+        gender: <string> (This can only be one of male,female,other)
+        dob: <string> (This needs to be ISO format date only)
+        country: <string> (This can only be one of ind,usa,qat)
+
+    merchant_create_wallettransactions:
+      title: merchant_create_wallettransactions
+      required:
+        - amount
+        - hash
+        - operation
+      type: object
+      properties:
+        wallet_id:
+          type: string
+          description: (One of wallet_id, lead_id, customer_id is required) (This needs to be wallets _id value)
+        lead_id:
+          type: string
+          description: (One of wallet_id, lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of wallet_id, lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        title:
+          type: string
+          description: (Any string that needs to be passed as a title)
+        description:
+          type: string
+          description: (Any string that needs to be passed as a description)
+        amount:
+          type: number
+          description: (Required) (Minimum is 0)
+        hash:
+          type: string
+          description: (Required) (Minimum length is 1) (Maximum length is 128) (Unique transaction hash value, generate using purpose + user identifier as a seed to avoid duplicate rewards)
+        operation:
+          type: string
+          description: (Required) (This can only be one of cr,dr)
+        status:
+          type: string
+          description: (This can only be one of success)
+
+      example:
+        wallet_id: <uuid> (One of wallet is required) (This needs to be wallets _id value)
+        lead_id: (One of wallet_id, lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id: (One of wallet_id, lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        title: <string> (Any string that needs to be passed as a title)
+        description: <string> (Any string that needs to be passed as a description)
+        amount: 0
+        hash: <string> (Required) (Minimum length is 1) (Maximum length is 128) (Unique transaction hash value, generate using purpose + user identifier as a seed to avoid duplicate rewards)
+        operation: <string> (Required) (This can only be one of cr,dr)
+        type: <string> (This can only be one of reward,adjust)
+        status: <string> (This can only be one of success)
+
+    merchant_update_wallettransactions:
+      title: merchant_update_wallettransactions
+      type: object
+      properties:
+        status:
+          type: string
+          description: (This can only be one of success)
+
+      example:
+        status: <string> (This can only be one of success)
+
+    lead_mobile:
+      title: lead_mobile
+      required:
+        - mobile_code
+        - mobile
+      type: object
+      properties:
+        mobile_code:
+          type: string
+          description: (Required) (This can be only one of 91,1,974)
+        mobile:
+          type: string
+          description: (Required) (Minimum length is 4) (Maximum length is 12)
+      example:
+        mobile_code: <string> (Required) (This can be only one of 91,1,974)
+        mobile: <string> (Required) (Minimum length is 4) (Maximum length is 12)
+
+    triggeractivity_metadetail:
+      title: triggeractivity_metadetail
+      type: object
+      properties:
+        email:
+          type: string
+          description: (This needs to be valid email)
+        mobile:
+          $ref: "#/components/schemas/lead_mobile"
+        gender:
+          type: string
+          description: (This can only be one of male,female,other)
+        dob:
+          type: string
+          description: (This needs to be ISO format date only)
+        country:
+          type: string
+          description: (This can only be one of ind,usa,qat)
+      example:
+        email: <string> (This needs to be valid email)
+        mobile:
+          mobile_code: <string> (Required) (This can be only one of 91,1,974)
+          mobile: <string> (Required) (Minimum length is 4) (Maximum length is 12)
+        gender: <string> (This can only be one of male,female,other)
+        dob: <string> (This needs to be ISO format date only)
+        country: <string> (This can only be one of ind,usa,qat)
+
+    triggeractivity_trace:
+      title: triggeractivity_trace
+      type: object
+      properties:
+        params_for_on_activity_amount_reached_rule:
+          $ref: "#/components/schemas/params_for_on_activity_amount_reached_rule"
+        params_for_emailtool:
+          $ref: "#/components/schemas/params_for_emailtool"
+        via_api_for_wallet:
+          $ref: "#/components/schemas/triggeractivity_wallet_reward"
+        via_api_for_deal:
+          $ref: "#/components/schemas/triggeractivity_deal_reward"
+        via_api_for_discount:
+          $ref: "#/components/schemas/triggeractivity_discount_reward"
+        via_api_for_callback:
+          $ref: "#/components/schemas/triggeractivity_callback_reward"
+        via_api_for_emailtool:
+          $ref: "#/components/schemas/triggeractivity_emailtool_reward"
+      example:
+        params_for_on_activity_amount_reached_rule:
+          activity_amount: 0
+        params_for_emailtool:
+          email_body:
+            anykey: (Anything that needs to be passed as data to email template)
+        via_api_for_wallet:
+          title: <string> (Any string that needs to be passed as a title) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+          description: <string> (Any string that needs to be passed as a description) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+          operation: <string> (This can only be one of cr,dr) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+          point_range:
+            min: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+            max: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+        via_api_for_deal:
+          deal_id: <uuid> (This needs to be deals _id value) (This will be ignored if the trigger is not of type deal reward or value override is not allowed)
+          category_range: []
+          country_range: []
+          price_range:
+            min: <number> (This is deal coin amount range) (This will be ignored if the trigger is not of type deal reward or value override is not allowed)
+            max: <number> (This is deal coin amount range) (This will be ignored if the trigger is not of type deal reward or value override is not allowed)
+        via_api_for_discount:
+          discount_id: <uuid> (This needs to be discounts _id value) (This will be ignored if the trigger is not of type discount reward or value override is not allowed)
+          category_range: []
+          country_range: []
+          price_range:
+            min: <number> (This is discount coin amount range) (This will be ignored if the trigger is not of type discount reward or value override is not allowed)
+            max: <number> (This is discount coin amount range) (This will be ignored if the trigger is not of type discount reward or value override is not allowed)
+        via_api_for_callback:
+          uri: <string> (This is the callback uri) (This will be ignored if the trigger is not of type callback reward or value override is not allowed)
+        via_api_for_emailtool:
+          subject: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+          emailtype: (This can only be one of transactional,marketing) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+          emailtemplate_id: (This needs to be emailtemplates _id value) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+
+    params_for_on_activity_amount_reached_rule:
+      title: params_for_on_activity_amount_reached_rule
+      type: object
+      properties:
+        activity_amount:
+          type: number
+          description: (This needs to be the trigger activity amount value, used for on_activity_amount_reached type triggers)
+      example:
+        activity_amount: 0
+
+    params_for_emailtool:
+      title: params_for_emailtool
+      type: object
+      properties:
+        email_body:
+          type: object
+          description: (Anything that needs to be passed as data to email template)
+      example:
+        email_body:
+          anykey: (Anything that needs to be passed as data to email template)
+
+    triggeractivity_wallet_reward:
+      title: triggeractivity_wallet_reward
+      type: object
+      properties:
+        title:
+          type: string
+          description: (Any string that needs to be passed as a title) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+        description:
+          type: string
+          description: (Any string that needs to be passed as a description) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+        operation:
+          type: string
+          description: <string> (This can only be one of cr,dr) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+        point_range:
+          type: object
+          description: (This is the range between which the wallet point will be rewarded) (This will be ignored if the actionrule is not of type wallet reward or it has blocked the value override)
+      example:
+        title: <string> (Any string that needs to be passed as a title) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+        description: <string> (Any string that needs to be passed as a description) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+        operation: <string> (This can only be one of cr,dr) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+        point_range:
+          min: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+          max: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+
+    triggeractivity_deal_reward:
+      title: triggeractivity_deal_reward
+      type: object
+      properties:
+        deal_id:
+          type: string
+          description: (This needs to be deals _id value) (This will be ignored if the actionrule is not of type deal reward or it has blocked the value override)
+        category_range:
+          type: array
+          description: (These are deal categories) (This can only be from fashion,electronics,entertainment,food & grocery,beauty,fitness,other) (This will be ignored if the actionrule is not of type deal reward or it has blocked the value override)
+        country_range:
+          type: array
+          description: (These are deal countries) (This can only be from ind,usa) (This will be ignored if the actionrule is not of type deal reward or it has blocked the value override)
+        price_range:
+          type: object
+          description: (This is deal coin amount range in nector coin) (If passed, deal will be selected between min and max coin amount) (This will be ignored if the actionrule is not of type deal reward or it has blocked the value override)
+      example:
+        deal_id: <uuid> (This needs to be deals _id value) (This will be ignored if the actionrule is not of type deal reward or it has blocked the value override)
+        category_range: []
+        country_range: []
+        price_range:
+          min: <number> (This is deal coin amount range in nector coin) (If passed, deal will be selected between min and max coin amount) (This will be ignored if the actionrule is not of type deal reward or it has blocked the value override)
+          max: <number> (This is deal coin amount range in nector coin) (If passed, deal will be selected between min and max coin amount) (This will be ignored if the actionrule is not of type deal reward or it has blocked the value override)
+
+    triggeractivity_discount_reward:
+      title: triggeractivity_discount_reward
+      type: object
+      properties:
+        discount_id:
+          type: string
+          description: (This needs to be discounts _id value) (This will be ignored if the actionrule is not of type discounts reward or it has blocked the value override)
+        category_range:
+          type: array
+          description: (These are discount categories) (This can only be from fashion,electronics,entertainment,food & grocery,beauty,fitness,other) (This will be ignored if the actionrule is not of type discount reward or it has blocked the value override)
+        country_range:
+          type: array
+          description: (These are discount countries) (This can only be from ind,usa) (This will be ignored if the actionrule is not of type discount reward or it has blocked the value override)
+        price_range:
+          type: object
+          description: (This is discount coin amount range in nector coin) (If passed, discount will be selected between min and max coin amount) (This will be ignored if the actionrule is not of type discount reward or it has blocked the value override)
+      example:
+        discount_id: <uuid> (This needs to be discounts _id value) (This will be ignored if the actionrule is not of type discount reward or it has blocked the value override)
+        category_range: []
+        country_range: []
+        price_range:
+          min: <number> (This is discount coin amount range in nector coin) (If passed, discount will be selected between min and max coin amount) (This will be ignored if the actionrule is not of type discount reward or it has blocked the value override)
+          max: <number> (This is discount coin amount range in nector coin) (If passed, discount will be selected between min and max coin amount) (This will be ignored if the actionrule is not of type discount reward or it has blocked the value override)
+
+    triggeractivity_callback_reward:
+      title: triggeractivity_callback_reward
+      type: object
+      properties:
+        uri:
+          type: string
+          description: (This needs to be your service callback webhook uri) (This will be ignored if the actionrule is not of type callback reward or it has blocked the value override)
+      example:
+        uri: <string> (This needs to be your service callback webhook uri) (This will be ignored if the actionrule is not of type callback reward or it has blocked the value override)
+
+    triggeractivity_emailtool_reward:
+      title: triggeractivity_emailtool_reward
+      type: object
+      properties:
+        subject:
+          type: string
+          description: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+        emailtype:
+          type: string
+          description: (This can only be one of transactional,marketing) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+        emailtemplate_id:
+          type: string
+          description: (This needs to be emailtemplates _id value) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+      example:
+        subject: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+        emailtype: (This can only be one of transactional,marketing) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+        emailtemplate_id: (This needs to be emailtemplates _id value) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+tags:
+  - name: Start Rewarding in 5 minutes
+  - name: Offering
+  - name: User Tool
+  - name: Listing APIs
+  - name: Misc
+
+paths:
+  /triggeractivities:
+    post:
+      tags:
+        - Start Rewarding in 5 minutes
+      summary: Reward Using Trigger
+      description: |-
+        NOTICE - Other Rewarding APIs will be deprecated in favour of this API
+
+            - One single API for all your rewarding needs. This API is used to reward user whatever is defined inside the triggers or passed via traces if trigger value override is allowed. It will automatically create the user if does not exists.
+            - Triggers can be created from the dashboard
+            - Contact us at info@nector.io for help
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_triggeractivities"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /plans/{id}:
+    get:
+      tags:
+        - Listing APIs
+      summary: Get Plan
+      description: Get details of the plan
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This can be any valid uuidv4 value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /coupons/{id}:
+    get:
+      tags:
+        - Listing APIs
+      summary: Get Coupon
+      description: Get details of the coupon
+      parameters:
+        - name: customer_id
+          in: query
+          description: (One of lead_id, customer_id is required) (This needs to be leads customer_id value)
+          schema:
+            type: string
+        - name: lead_id
+          in: query
+          description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: (Minimum length is 4) (Maximum length is 20) (This needs to be coupons code value)
+          schema:
+            type: string
+        - name: redeem_link
+          in: query
+          description: (This needs to be coupons redeem_link value)
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: (Required) (This can be any valid uuidv4 value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /coupons:
+    get:
+      tags:
+        - Listing APIs
+      summary: Fetch Coupons
+      description: Fetch coupons based on various filters
+      parameters:
+        - name: lead_id
+          in: query
+          description: (Required) (This needs to be leads _id value)
+          required: true
+          schema:
+            type: string
+        - name: parent_id
+          in: query
+          description: (This needs to be coupons parent_id value)
+          schema:
+            type: string
+        - name: parent_type
+          in: query
+          description: (This needs to be coupons parent_type value) (This can only be one of deals,discounts)
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be coupons _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 1000)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /dealredeems:
+    post:
+      tags:
+        - Offering
+      summary: Redeem Deal
+      description: Redeem a deal using wallet points.
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_dealredeems"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /deals/{id}:
+    get:
+      tags:
+        - Listing APIs
+      summary: Get Deal
+      description: Get details of the deal
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be deals _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /deals:
+    get:
+      tags:
+        - Listing APIs
+      summary: Fetch Deals
+      description: Fetch deals based on various filters
+      parameters:
+        - name: name
+          in: query
+          description: (This needs to be deals %name% value)
+          schema:
+            type: string
+        - name: country
+          in: query
+          description: (This needs to be deals country value) (This can only be one of ind,usa,qat)
+          schema:
+            type: string
+        - name: visibility
+          in: query
+          description: (This needs to be deals visibility value) (This can only be one of public,private)
+          schema:
+            type: string
+        - name: brand
+          in: query
+          description: (This needs to be deals brand value)
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: (This needs to be deals category value) (This can only be one of fashion,electronics,entertainment,food & grocery,beauty,fitness,other)
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be deals _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 1000)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /discountredeems:
+    post:
+      tags:
+        - Offering
+      summary: Redeem Discount
+      description: Redeem a discount using wallet points.
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_discountredeems"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /discounts/{id}:
+    get:
+      tags:
+        - Listing APIs
+      summary: Get Discount
+      description: Get details of the discount
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be discounts _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /discounts:
+    get:
+      tags:
+        - Listing APIs
+      summary: Fetch Discounts
+      description: Fetch discounts based on various filters
+      parameters:
+        - name: name
+          in: query
+          description: (This needs to be discounts %name% value)
+          schema:
+            type: string
+        - name: country
+          in: query
+          description: (This needs to be discounts country value) (This can only be one of ind,usa,qat)
+          schema:
+            type: string
+        - name: visibility
+          in: query
+          description: (This needs to be discounts visibility value) (This can only be one of public,private)
+          schema:
+            type: string
+        - name: brand
+          in: query
+          description: (This needs to be discounts brand value)
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: (This needs to be discounts category value) (This can only be one of fashion,electronics,entertainment,food & grocery,beauty,fitness,other)
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be discounts _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 1000)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /instructions/{id}:
+    get:
+      tags:
+        - Listing APIs
+      summary: Get Instruction
+      description: Get details of the instruction
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be instructions _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /instructions:
+    get:
+      tags:
+        - Listing APIs
+      summary: Fetch Instructions
+      description: Fetch instructions based on various filters
+      parameters:
+        - name: type
+          in: query
+          description: (This needs to be instructions type value) (This can only be one of ways_to_redeem,ways_to_earn,showcase)
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: (This needs to be instructions %name% value)
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be instructions _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 1000)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /leads/{id}:
+    put:
+      tags:
+        - User Tool
+      summary: Update User
+      description: Update details of the user
+      parameters:
+        - name: customer_id
+          in: query
+          description: (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: (Required) (This needs to be leads _id value) (If need to update user via customer id pass any random uuid v4 value for id)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_update_leads"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+    get:
+      tags:
+        - Listing APIs
+      summary: Get User
+      description: Get details of the user
+      parameters:
+        - name: customer_id
+          in: query
+          description: (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while searching user)
+          schema:
+            type: string
+        - name: referral_code
+          in: query
+          description: (This needs to be leads referral_code value) (If this value is passed, it will be given second preference while searching user)
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: (Required) (This needs to be leads _id value) (If need to get user via customer id pass any random uuid v4 value for id)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /leads:
+    post:
+      tags:
+        - User Tool
+      summary: Create User
+      description: Create a new user if it does not exists
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_leads"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /wallets/{id}:
+    get:
+      tags:
+        - Listing APIs
+      summary: Get Wallet
+      description: Get details of the wallet
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be wallets _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /wallettransactions/{id}:
+    put:
+      tags:
+        - Offering
+      summary: Update WalletTransaction
+      description: Update details of the wallet transaction
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be wallettransactions _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_update_wallettransactions"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+    get:
+      tags:
+        - Listing APIs
+      summary: Get WalletTransaction
+      description: Get details of the wallet transaction
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be wallettransactions _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /wallettransactions:
+    get:
+      tags:
+        - Listing APIs
+      summary: Fetch WalletTransactions
+      description: Fetch wallet transactions based on various filters
+      parameters:
+        - name: lead_id
+          in: query
+          description: (Required) (This needs to be leads _id value)
+          required: true
+          schema:
+            type: string
+        - name: wallet_id
+          in: query
+          description: (This needs to be wallettransactions wallet_id value)
+          schema:
+            type: string
+        - name: hash
+          in: query
+          description: (Minimum length is 1) (Maximum length is 128) (This needs to be wallettransactions hash value)
+          schema:
+            type: string
+        - name: operation
+          in: query
+          description: (This needs to be wallettransactions operation value) (This can only be one of cr,dr)
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be wallettransactions _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 1000)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+    post:
+      tags:
+        - Offering
+      summary: Reward WalletPoint
+      description: Reward wallet point to your user
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_wallettransactions"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
