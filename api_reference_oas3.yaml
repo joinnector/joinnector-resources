@@ -333,6 +333,55 @@ paths:
           description: "200"
       security: []
 
+  /activities/count/{id}:
+    get:
+      tags:
+        - Listing APIs
+      summary: Get Activity Count
+      description: Get acount of activities made by a customer on a trigger
+      parameters:
+        - name: lead_id
+          in: query
+          description: (Required) (This needs to be leads _id value)
+          required: true
+          schema:
+            type: string
+        - name: parent_id
+          in: query
+          description: (Required) (This needs to be triggers _id value)
+          required: true
+          schema:
+            type: string
+        - name: parent_type
+          in: query
+          description: (Required) (This needs to be one of triggers)
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: (Required) (This can be any valid uuidv4 value or activities _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /coupons/{id}:
     get:
       tags:
@@ -357,7 +406,7 @@ paths:
             type: string
         - name: id
           in: path
-          description: (Required) (This can be any valid uuidv4 value)
+          description: (Required) (This can be any valid uuidv4 value or coupons _id value)
           required: true
           schema:
             type: string
