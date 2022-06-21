@@ -105,7 +105,7 @@ components:
             title: <string> (Any string that needs to be passed as a title) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
             description: <string> (Any string that needs to be passed as a description) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
             operation: <string> (This can only be one of cr,dr) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
-            point_range:
+            coin_range:
               min: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
               max: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
           via_api_for_offer:
@@ -212,7 +212,7 @@ components:
           title: <string> (Any string that needs to be passed as a title) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
           description: <string> (Any string that needs to be passed as a description) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
           operation: <string> (This can only be one of cr,dr) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
-          point_range:
+          coin_range:
             min: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
             max: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
         via_api_for_offer:
@@ -237,14 +237,14 @@ components:
         operation:
           type: string
           description: <string> (This can only be one of cr,dr) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
-        point_range:
+        coin_range:
           type: object
           description: (This is the range between which the wallet point will be rewarded) (This will be ignored if the rule is not of type wallet reward or it does not allow value override)
       example:
         title: <string> (Any string that needs to be passed as a title) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
         description: <string> (Any string that needs to be passed as a description) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
         operation: <string> (This can only be one of cr,dr) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
-        point_range:
+        coin_range:
           min: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
           max: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
 
