@@ -333,7 +333,7 @@ paths:
           description: "200"
       security: []
 
-  /activities/count/{id}:
+  /activities-count:
     get:
       tags:
         - Listing APIs
@@ -355,12 +355,6 @@ paths:
         - name: parent_type
           in: query
           description: (Required) (This needs to be one of triggers)
-          required: true
-          schema:
-            type: string
-        - name: id
-          in: path
-          description: (Required) (This can be any valid uuidv4 value or activities _id value)
           required: true
           schema:
             type: string
