@@ -338,7 +338,7 @@ paths:
       tags:
         - Listing APIs
       summary: Get Activity Count
-      description: Get acount of activities made by a customer on a trigger
+      description: Get count of activities made by a customer on a trigger
       parameters:
         - name: lead_id
           in: query
@@ -901,6 +901,101 @@ paths:
         - name: sort_op
           in: query
           description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /reviews:
+    get:
+      tags:
+        - Listing APIs
+      summary: Fetch Reviews
+      description: Fetch reviews based on various filters
+      parameters:
+        - name: reference_product_source
+          in: query
+          description: (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+          schema:
+            type: string
+        - name: reference_product_id
+          in: query
+          description: (This needs to be products reference_product_id value)
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be reviews _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 100)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /reviews-count:
+    get:
+      tags:
+        - Listing APIs
+      summary: Get Review Stats
+      description: Get review stats for the passed filters
+      parameters:
+        - name: reference_product_source
+          in: query
+          description: (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+          schema:
+            type: string
+        - name: reference_product_id
+          in: query
+          description: (This needs to be products reference_product_id value)
           schema:
             type: string
         - name: x-source
