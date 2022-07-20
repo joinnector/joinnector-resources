@@ -111,7 +111,6 @@ components:
           via_api_for_offer:
             offer_id: <uuid> (This needs to be offers _id value) (This will be ignored if the trigger is not of type offer reward or value override is not allowed)
             category_range: []
-            country_range: []
           via_api_for_emailtool:
             subject: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
             emailtype: (This can only be one of transactional,marketing) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
@@ -218,7 +217,6 @@ components:
         via_api_for_offer:
           offer_id: <uuid> (This needs to be offers _id value) (This will be ignored if the trigger is not of type offer reward or value override is not allowed)
           category_range: []
-          country_range: []
         via_api_for_emailtool:
           subject: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
           emailtype: (This can only be one of transactional,marketing) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
@@ -258,13 +256,9 @@ components:
         category_range:
           type: array
           description: (These are offer categories) (This can only be from fashion,electronics,entertainment,food & grocery,beauty,fitness,other) (This will be ignored if the rule is not of type offer reward or it does not allow value override)
-        country_range:
-          type: array
-          description: (These are offer countries) (This can only be from ind,usa) (This will be ignored if the rule is not of type offer reward or it does not allow value override)
       example:
         offer_id: <uuid> (This needs to be offers _id value) (This will be ignored if the rule is not of type offer reward or it does not allow value override)
         category_range: []
-        country_range: []
 
     subschema_trace_emailtool_reward:
       title: subschema_trace_emailtool_reward
