@@ -10,13 +10,13 @@ info:
         - Check your pland usage information from the dashboard
         - Nector eforces strict param check. (Pass string if it requires string and so on)
         - UUID version we support is v4.
-        - Contact us at info@nector.io for help
+        - Contact us at team@nector.io for help
 
     Click on export and copy-paste the openapi 3.0 spec inside postman. Get started by creating an account on https://merchant.nector.io
   contact:
     name: nector
     url: https://nector.io
-    email: info@nector.io
+    email: team@nector.io
   version: 1.0.0
 servers:
   - url: https://platform.nector.io/api/v2/merchant
@@ -78,9 +78,9 @@ components:
         name:
           type: string
           description: (This is name of this user)
-        badge:
+        tier:
           type: string
-          description: (This can only be one of gold,silver,bronze,diamond,platinum) (If user does not exists it will get created with passed badge value)
+          description: (This can only be one of the defined tiers)
         metadetail:
           $ref: "#/components/schemas/subschema_metadetail"
         trace:
@@ -93,7 +93,7 @@ components:
         referral_code: <string> (Minimum length is 1) (Maximum length is 128) (If user does not exists it will get created with passed referral_code value else a random 8 digit referral_code will be generated for this user)
         referred_by_referral_code: <string> (Minimum length is 1) (Maximum length is 128) (This needs to be other leads referral_code value) (If user does not exists and referred_by_referral_code then referral based reward system will reward both the user)
         name: <string> (This is name of this user)
-        badge: <string> (This can only be one of gold,silver,bronze,diamond,platinum)
+        tier: <string> (This can only be one of the defined tiers)
         metadetail:
           email: <string> (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15)
@@ -143,15 +143,15 @@ components:
         name:
           type: string
           description: (This is name of this user)
-        badge:
+        tier:
           type: string
-          description: (This can only be one of gold,silver,bronze,diamond,platinum)
+          description: (This can only be one of the defined tiers)
         metadetail:
           $ref: "#/components/schemas/subschema_metadetail"
 
       example:
         name: <string> (This is name of this user)
-        badge: <string> (This can only be one of gold,silver,bronze,diamond,platinum)
+        tier: <string> (This can only be one of the defined tiers)
         metadetail:
           email: <string> (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15)
@@ -301,7 +301,7 @@ paths:
 
             - One single API for all your rewarding needs.
             - Triggers can be created from the dashboard
-            - Contact us at info@nector.io for help
+            - Contact us at team@nector.io for help
       parameters:
         - name: x-source
           in: header
