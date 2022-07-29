@@ -746,37 +746,6 @@ paths:
           description: "200"
       security: []
 
-  /wallets/{id}:
-    get:
-      tags:
-        - Listing APIs
-      summary: Get Wallet
-      description: Get details of the wallet
-      parameters:
-        - name: id
-          in: path
-          description: (Required) (This needs to be wallets _id value)
-          required: true
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
   /wallettransactions/{id}:
     put:
       tags:
@@ -855,11 +824,6 @@ paths:
           in: query
           description: (Required) (This needs to be leads _id value)
           required: true
-          schema:
-            type: string
-        - name: wallet_id
-          in: query
-          description: (This needs to be wallettransactions wallet_id value)
           schema:
             type: string
         - name: hash
