@@ -1008,6 +1008,54 @@ paths:
           description: "200"
       security: []
 
+  /leads-referred-by-referral-code/{id}:
+    put:
+      tags:
+        - User Tool
+      summary: Update Referred By Referral Code (This needs to be called for the referee)
+      description: Update referred_by_referral_code of the user
+      parameters:
+        - name: customer_id
+          in: query
+          description: (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
+          schema:
+            type: string
+        - name: referred_by_referral_code
+          in: query
+          description: (This needs to be referrer leads referral_code value)
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: (Required) (This needs to be leads _id value) (If need to update user via customer id pass any random uuid v4 value for id)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_update_leads"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /wallettransactions/{id}:
     put:
       tags:
