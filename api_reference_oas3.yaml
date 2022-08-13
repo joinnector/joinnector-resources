@@ -380,12 +380,12 @@ paths:
             type: string
         - name: parent_id
           in: query
-          description: (This needs to be triggers _id value)
+          description: (This needs to be activities parent_id value)
           schema:
             type: string
         - name: parent_type
           in: query
-          description: (This needs to be one of triggers)
+          description: (This needs to be one of leads, coupons, wallettransactions, reviews, orders, triggers)
           schema:
             type: string
         - name: event
@@ -451,13 +451,13 @@ paths:
             type: string
         - name: parent_id
           in: query
-          description: (Required) (This needs to be triggers _id value)
+          description: (Required) (This needs to be activities parent_id value)
           required: true
           schema:
             type: string
         - name: parent_type
           in: query
-          description: (Required) (This needs to be one of triggers)
+          description: (Required) (This needs to be one of leads, coupons, wallettransactions, reviews, orders, triggers)
           required: true
           schema:
             type: string
