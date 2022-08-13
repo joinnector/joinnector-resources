@@ -165,7 +165,6 @@ components:
           description: (This can only be one of the defined tiers)
         metadetail:
           $ref: "#/components/schemas/subschema_metadetail"
-
       example:
         name: <string> (This is name of this user)
         tier: <string> (This can only be one of the defined tiers)
@@ -175,6 +174,22 @@ components:
           gender: <string> (This can only be one of male,female,other)
           dob: <string> (This needs to be ISO format date only)
           country: <string> (This can only be one of ind,usa,qat)
+    
+    merchant_update_referredbyreferralcode:
+      title: merchant_update_referredbyreferralcode
+      type: object
+      required:
+        - referred_by_referral_code
+      properties:
+        customer_id:
+          type: string
+          description: (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
+        referred_by_referral_code:
+          type: string
+          description: (This needs to be referrer leads referral_code value)
+      example:
+        customer_id: <string> (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
+        referred_by_referral_code: <string> (This needs to be referrer leads referral_code value)
 
     merchant_update_wallettransactions:
       title: merchant_update_wallettransactions
@@ -1015,17 +1030,6 @@ paths:
       summary: Update Referred By Referral Code (This needs to be called for the referee)
       description: Update referred_by_referral_code of the user
       parameters:
-        - name: customer_id
-          in: query
-          description: (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
-          schema:
-            type: string
-        - name: referred_by_referral_code
-          in: query
-          description: (This needs to be referrer leads referral_code value)
-          required: true
-          schema:
-            type: string
         - name: id
           in: path
           description: (Required) (This needs to be leads _id value) (If need to update user via customer id pass any random uuid v4 value for id)
@@ -1048,7 +1052,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/merchant_update_leads"
+              $ref: "#/components/schemas/merchant_update_referredbyreferralcode"
         required: true
 
       responses:
