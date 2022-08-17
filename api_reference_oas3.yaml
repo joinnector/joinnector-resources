@@ -1023,7 +1023,7 @@ paths:
           description: "200"
       security: []
 
-  /leads-referred-by-referral-code/{id}:
+  /leads/referred-by-referral-code/{id}:
     put:
       tags:
         - User Tool
