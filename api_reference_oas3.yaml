@@ -174,7 +174,7 @@ components:
           gender: <string> (This can only be one of male,female,other)
           dob: <string> (This needs to be ISO format date only)
           country: <string> (This can only be one of ind,usa,qat)
-    
+
     merchant_update_referredbyreferralcode:
       title: merchant_update_referredbyreferralcode
       type: object
@@ -369,6 +369,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -445,6 +451,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -488,6 +500,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -516,6 +534,12 @@ paths:
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
           required: true
           schema:
             type: string
@@ -595,6 +619,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -617,6 +647,12 @@ paths:
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
           required: true
           schema:
             type: string
@@ -654,6 +690,12 @@ paths:
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
           required: true
           schema:
             type: string
@@ -712,6 +754,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -740,6 +788,12 @@ paths:
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
           required: true
           schema:
             type: string
@@ -798,6 +852,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -826,6 +886,12 @@ paths:
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
           required: true
           schema:
             type: string
@@ -885,6 +951,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -935,6 +1007,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -968,6 +1046,12 @@ paths:
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
           required: true
           schema:
             type: string
@@ -1017,6 +1101,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -1027,8 +1117,8 @@ paths:
     put:
       tags:
         - User Tool
-      summary: Update Referred By Referral Code (This needs to be called for the referee)
-      description: Update referred_by_referral_code of the user
+      summary: Update Referred By Referral Code (This needs to be called for the referee) (Calls are suporred only from full access API key)
+      description: Update referral details of the user
       parameters:
         - name: id
           in: path
@@ -1048,6 +1138,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -1064,7 +1160,7 @@ paths:
     put:
       tags:
         - Offering
-      summary: Update WalletTransaction
+      summary: Update WalletTransaction (Calls are suporred only from full access API key)
       description: Update details of the wallet transaction
       parameters:
         - name: id
@@ -1082,6 +1178,12 @@ paths:
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
           required: true
           schema:
             type: string
@@ -1118,6 +1220,12 @@ paths:
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
           required: true
           schema:
             type: string
@@ -1187,6 +1295,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -1247,6 +1361,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
@@ -1279,6 +1399,12 @@ paths:
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
           required: true
           schema:
             type: string
