@@ -99,7 +99,6 @@ components:
           mobile: <string> (Minimum length is 4) (Maximum length is 15)
           gender: <string> (This can only be one of male,female,other)
           dob: <string> (This needs to be ISO format date only)
-          country: <string> (This can only be one of ind,usa,qat)
         trace:
           params_for_activityrule:
             delta_id: <uuid> (This needs to be unique value used while evaluating after_delta_day rule)
@@ -173,7 +172,6 @@ components:
           mobile: <string> (Minimum length is 4) (Maximum length is 15)
           gender: <string> (This can only be one of male,female,other)
           dob: <string> (This needs to be ISO format date only)
-          country: <string> (This can only be one of ind,usa,qat)
 
     merchant_update_referredbyreferralcode:
       title: merchant_update_referredbyreferralcode
@@ -218,9 +216,6 @@ components:
         dob:
           type: string
           description: (This needs to be ISO format date only)
-        country:
-          type: string
-          description: (This can only be one of ind,usa,qat)
 
     subschema_trace:
       title: subschema_trace
