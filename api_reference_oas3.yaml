@@ -2,21 +2,21 @@ openapi: 3.0.0
 info:
   title: API reference
   description: |-
-    Scalable, workflow driven rewards, engagement and cross selling solution for your website and apps.
+    Nector - Powerful Customer Engagement & Loyalty Platform
 
         - Only use readonly APIs if integrating with frontend apps or website.
         - Try and use cachefront.nector.io instead of platform.nector.io as much as possible.
         - A maximum of 100 API calls per minute is allowed
-        - Check your pland usage information from the dashboard
+        - Check your plan usage information from the dashboard
         - Nector eforces strict param check. (Pass string if it requires string and so on)
         - UUID version we support is v4.
-        - Contact us at team@nector.io for help
+        - Contact us at tech@nector.io for help
 
     Click on export and copy-paste the openapi 3.0 spec inside postman. Get started by creating an account on https://merchant.nector.io
   contact:
     name: nector
     url: https://nector.io
-    email: team@nector.io
+    email: tech@nector.io
   version: 1.0.0
 servers:
   - url: https://platform.nector.io/api/v2/merchant
@@ -354,7 +354,7 @@ paths:
 
             - One single API for all your rewarding needs.
             - Triggers can be created from the dashboard
-            - Contact us at team@nector.io for help
+            - Contact us at tech@nector.io for help
       parameters:
         - name: x-source
           in: header
