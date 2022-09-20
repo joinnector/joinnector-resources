@@ -224,9 +224,12 @@ components:
         params_for_activityrule:
           type: object
           properties:
-            delta_id:
+            evaluation_id:
               type: string
-              description: <uuid> (This needs to be unique value used while evaluating after_delta_day rule)
+              description: <uuid> (This needs to be resource value used while evaluating after_delta_day rule, must be passed along with evaluation_type)
+            evaluation_type:
+              type: string
+              description: <uuid> (This needs to be resource value type used while evaluating after_delta_day rule, must be passed along with evaluation_id) (This can only be one of leads, coupons, wallettransactions, reviews, orders, triggers)
             count:
               type: number
               description: <number> (Minimum value is 1) (This needs to be valid integer value use while evaluating on_activity_count_reached, on_timeline_count_reached rules)
