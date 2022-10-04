@@ -1,0 +1,2 @@
+product_id,product_source,reviewer_email,reviewer_name,rating,title,body,review_date,is_verified,is_approved
+123,shopify,a1@nector.io,a2,4,testing,testing,2022-10-03T15:08:12.785Z,1,1

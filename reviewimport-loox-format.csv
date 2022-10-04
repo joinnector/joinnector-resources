@@ -1,0 +1,2 @@
+productId,productSource,email,nickname,rating,review,date,orderId,status
+123,shopify,a1@nector.io,a2,4,testing,2022-10-03T15:08:12.785Z,123,Active
