@@ -981,7 +981,7 @@ paths:
     put:
       tags:
         - User Tool
-      summary: Update User
+      summary: Update User (Calls from readonly API key will not update value if it already exists)
       description: Update details of the user
       parameters:
         - name: customer_id
