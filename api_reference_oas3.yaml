@@ -97,6 +97,7 @@ components:
         metadetail:
           email: <string> (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15)
+          country: <string> (This needs to one of the allowed countries) (Should be 3 character long and lowercase)
           gender: <string> (This can only be one of male,female,other)
           dob: <string> (This needs to be ISO format date only)
         trace:
@@ -161,6 +162,7 @@ components:
         metadetail:
           email: <string> (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15)
+          country: <string> (This needs to one of the allowed countries) (Should be 3 character long and lowercase)
           gender: <string> (This can only be one of male,female,other)
           dob: <string> (This needs to be ISO format date only)
 
@@ -201,6 +203,9 @@ components:
         mobile:
           type: string
           description: <string> (Minimum length is 4) (Maximum length is 15)
+        country:
+          type: string
+          description: <string> (This needs to one of the allowed countries) (Should be 3 character long and lowercase)
         gender:
           type: string
           description: (This can only be one of male,female,other)
