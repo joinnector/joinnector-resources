@@ -193,6 +193,17 @@ components:
       example:
         status: <string> (This can only be one of success)
 
+    merchant_update_coupons:
+      title: merchant_update_coupons
+      type: object
+      properties:
+        status:
+          type: string
+          description: (This can only be one of redeemed)
+
+      example:
+        status: <string> (This can only be one of redeemed)
+
     subschema_metadetail:
       title: subschema_metadetail
       type: object
@@ -471,6 +482,53 @@ paths:
       security: []
 
   /coupons/{id}:
+    put:
+      tags:
+        - Offering
+      summary: Update Coupon (Calls are suporred only from full access API key)
+      description: Update details of the coupon
+      parameters:
+        - name: value
+          in: query
+          description: (This needs to be coupons value field) (If this value is passed, it will be given first preference while updating coupon)
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: (Required) (This needs to be coupons _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_update_coupons"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
     get:
       tags:
         - Listing APIs
