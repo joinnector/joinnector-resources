@@ -1071,7 +1071,7 @@ paths:
     put:
       tags:
         - User Tool
-      summary: Update Referred By Referral Code (This needs to be called for the referee) (Calls are supported only from full access API key)
+      summary: Update Referred By Referral Code (Calls are supported only from full access API key)
       description: Update referral details of the user
       parameters:
         - name: id
