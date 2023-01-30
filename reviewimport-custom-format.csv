@@ -1,2 +1,2 @@
-reference_product_id,reference_product_source,email,name,rating,title,description,created_at,is_verified,is_approved
-123,shopify,a1@nector.io,a2,4,testing,testing,2022-10-03T15:08:12.785Z,1,1
+reference_product_id,reference_product_source,email,name,rating,title,description,created_at,is_verified,is_approved,image_links
+123,shopify,a1@nector.io,a2,4,testing,testing,2022-10-03T15:08:12.785Z,1,1,
