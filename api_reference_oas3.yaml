@@ -97,13 +97,6 @@ components:
           gender: <string> (This can only be one of male,female,other)
           dob: <string> (This needs to be ISO format date only)
         trace:
-          params_for_activityrule:
-            evaluation_id: <uuid> (This needs to be resource value used while evaluating after_delta_day rule, must be passed along with evaluation_type)
-            evaluation_type: <string> (This needs to be resource value type used while evaluating after_delta_day rule, must be passed along with evaluation_id) (This can only be one of leads, coupons, wallettransactions, reviews, orders, triggers)
-            count: 1
-            amount: 0
-          params_for_email:
-            randomkey_randomvalue_pair: <string> (any randomkey and randomvalue pair to pass to the emailtemplate) (upto 20 key-value pairs are allowed as part of params_for_email object)
           via_api_for_wallet:
             title: <string> (Any string that needs to be passed as a title) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
             description: <string> (Any string that needs to be passed as a description) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
@@ -115,10 +108,20 @@ components:
             offer_id: <uuid> (This needs to be offers _id value) (This will be ignored if the trigger is not of type offer reward or value override is not allowed)
             category_range: []
           via_api_for_email:
-            emailtool:
-              subject: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
-              emailtype: (This can only be one of transactional,marketing) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
-              emailtemplate_id: (This needs to be emailtemplates _id value) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+            subject: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+            emailtemplate_id: (This needs to be emailtemplates _id value) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+          via_api_for_event:
+            event_type: (This can only be one of reviewrequest_create)
+            integration_id: (This needs to be integrations _id value) (This will be ignored if the trigger is not of type event reward or value override is not allowed)
+          params_for_activityrule:
+            evaluation_id: <uuid> (This needs to be resource value used while evaluating after_delta_day rule, must be passed along with evaluation_type)
+            evaluation_type: <string> (This needs to be resource value type used while evaluating after_delta_day rule, must be passed along with evaluation_id) (This can only be one of leads, coupons, wallettransactions, reviews, orders, triggers)
+            count: 1
+            amount: 0
+          params_for_email:
+            randomkey_randomvalue_pair: <string> (any randomkey and randomvalue pair to pass to the emailtemplate) (upto 20 key-value pairs are allowed as part of params_for_email object)
+          params_for_event:
+            randomkey_randomvalue_pair: <string> (any randomkey and randomvalue pair to pass to the event) (upto 20 key-value pairs are allowed as part of params_for_event object)
 
     merchant_create_offerredeems:
       title: merchant_create_offerredeems
@@ -213,6 +216,14 @@ components:
       title: subschema_trace
       type: object
       properties:
+        via_api_for_wallet:
+          $ref: "#/components/schemas/subschema_trace_wallet_reward"
+        via_api_for_offer:
+          $ref: "#/components/schemas/subschema_trace_offer_reward"
+        via_api_for_email:
+          $ref: "#/components/schemas/subschema_trace_email_reward"
+        via_api_for_event:
+          $ref: "#/components/schemas/subschema_trace_event_reward"
         params_for_activityrule:
           type: object
           properties:
@@ -234,12 +245,12 @@ components:
             randomkey_randomvalue_pair:
               type: string
               description: <string> (any randomvalue to pass to the emailtemplate) (upto 20 key-value pairs are allowed as part of params_for_email object)
-        via_api_for_wallet:
-          $ref: "#/components/schemas/subschema_trace_wallet_reward"
-        via_api_for_offer:
-          $ref: "#/components/schemas/subschema_trace_offer_reward"
-        via_api_for_email:
-          $ref: "#/components/schemas/subschema_trace_email_reward"
+        params_for_event:
+          type: object
+          properties:
+            randomkey_randomvalue_pair:
+              type: string
+              description: <string> (any randomvalue to pass to the event) (upto 20 key-value pairs are allowed as part of params_for_event object)
 
     subschema_trace_wallet_reward:
       title: subschema_trace_wallet_reward
@@ -273,18 +284,23 @@ components:
       title: subschema_trace_email_reward
       type: object
       properties:
-        emailtool:
-          type: object
-          properties:
-            subject:
-              type: string
-              description: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
-            emailtype:
-              type: string
-              description: (This can only be one of transactional,marketing) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
-            emailtemplate_id:
-              type: string
-              description: (This needs to be emailtemplates _id value) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+        subject:
+          type: string
+          description: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+        emailtemplate_id:
+          type: string
+          description: (This needs to be emailtemplates _id value) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
+
+    subschema_trace_event_reward:
+      title: subschema_trace_event_reward
+      type: object
+      properties:
+        event_type:
+          type: string
+          description: (This can only be one of reviewrequest_create)
+        integration_id:
+          type: string
+          description: (This needs to be integrations _id value) (This will be ignored if the trigger is not of type event reward or value override is not allowed)
 
   securitySchemes:
     basicAuth:
