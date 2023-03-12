@@ -1103,48 +1103,6 @@ paths:
       security: []
 
   /wallettransactions/{id}:
-    put:
-      tags:
-        - Offering
-      summary: Update WalletTransaction (Calls are supported only from full access API key)
-      description: Update details of the wallet transaction
-      parameters:
-        - name: id
-          in: path
-          description: (Required) (This needs to be wallettransactions _id value)
-          required: true
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/merchant_update_wallettransactions"
-        required: true
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
     get:
       tags:
         - Listing APIs
