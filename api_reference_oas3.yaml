@@ -75,9 +75,6 @@ components:
         name:
           type: string
           description: (This is name of this user)
-        tier:
-          type: string
-          description: (This can only be one of the defined tiers)
         metadetail:
           $ref: "#/components/schemas/subschema_metadetail"
         trace:
@@ -89,7 +86,6 @@ components:
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
         referral_code: <string> (Minimum length is 1) (Maximum length is 128) (If user does not exists it will get created with passed referral_code value else a random 8 digit referral_code will be generated for this user)
         name: <string> (This is name of this user)
-        tier: <string> (This can only be one of the defined tiers)
         metadetail:
           email: <string> (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15)
@@ -148,11 +144,15 @@ components:
         tier:
           type: string
           description: (This can only be one of the defined tiers)
+        classification:
+          type: string
+          description: (This can only be one of lead,affiliate)
         metadetail:
           $ref: "#/components/schemas/subschema_metadetail"
       example:
         name: <string> (This is name of this user)
         tier: <string> (This can only be one of the defined tiers)
+        classification: <string> (This can only be one of lead,affiliate)
         metadetail:
           email: <string> (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15)
