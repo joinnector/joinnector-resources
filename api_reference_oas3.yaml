@@ -866,25 +866,22 @@ paths:
       parameters:
         - name: status
           in: query
-          description: (This needs to be products _id value) (This can be one of pending,processing,completed,cancelled,refunded,unknown)
-          required: true
+          description: (This needs to be orders _id value) (This can be one of pending,processing,completed,cancelled,refunded,unknown)
           schema:
             type: string
         - name: financial_status
           in: query
-          description: (This needs to be products _id value) (This can be one of pending,paid,partially_paid,refunded,partially_refunded)
-          required: true
+          description: (This needs to be orders _id value) (This can be one of pending,paid,partially_paid,refunded,partially_refunded)
           schema:
             type: string
         - name: delivery_status
           in: query
-          description: (This needs to be products _id value) (This can be one of pending,delivered,partially_delivered,undelivered,delivery_attempted)
-          required: true
+          description: (This needs to be orders _id value) (This can be one of pending,delivered,partially_delivered,undelivered,delivery_attempted)
           schema:
             type: string
         - name: id
           in: query
-          description: (This needs to be productvariants _id value)
+          description: (This needs to be orders _id value)
           schema:
             type: string
         - name: page
