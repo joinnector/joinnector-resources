@@ -857,6 +857,80 @@ paths:
           description: "200"
       security: []
 
+  /orders:
+    get:
+      tags:
+        - Listing APIs
+      summary: Fetch Orders
+      description: Fetch orders based on various filters
+      parameters:
+        - name: status
+          in: query
+          description: (This needs to be products _id value) (This can be one of pending,processing,completed,cancelled,refunded,unknown)
+          required: true
+          schema:
+            type: string
+        - name: financial_status
+          in: query
+          description: (This needs to be products _id value) (This can be one of pending,paid,partially_paid,refunded,partially_refunded)
+          required: true
+          schema:
+            type: string
+        - name: delivery_status
+          in: query
+          description: (This needs to be products _id value) (This can be one of pending,delivered,partially_delivered,undelivered,delivery_attempted)
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be productvariants _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 100)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /productvariants/{id}:
     get:
       tags:
