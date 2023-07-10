@@ -810,6 +810,53 @@ paths:
           description: "200"
       security: []
 
+  /orders/{id}:
+    get:
+      tags:
+        - Listing APIs
+      summary: Get Order
+      description: Get details of the order
+      parameters:
+        - name: reference_order_id
+          in: query
+          description: (This needs to be orders reference_order_id value) (This is the id of the order on the hst platform) (If this value is passed, it will be given first preference while searching order)
+          schema:
+            type: string
+        - name: reference_order_name
+          in: query
+          description: (This needs to be orders reference_order_name value) (This is the name of the order on the hst platform) (If this value is passed, it will be given second preference while searching order)
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: (Required) (This needs to be products _id value) (If need to get order via order reference id pass any random uuid v4 value for id)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /productvariants/{id}:
     get:
       tags:
