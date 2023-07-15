@@ -141,18 +141,10 @@ components:
         name:
           type: string
           description: (This is name of this user)
-        tier:
-          type: string
-          description: (This can only be one of the defined tiers)
-        classification:
-          type: string
-          description: (This can only be one of lead,affiliate)
         metadetail:
           $ref: "#/components/schemas/subschema_metadetail"
       example:
         name: <string> (This is name of this user)
-        tier: <string> (This can only be one of the defined tiers)
-        classification: <string> (This can only be one of lead,affiliate)
         metadetail:
           email: <string> (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15)
