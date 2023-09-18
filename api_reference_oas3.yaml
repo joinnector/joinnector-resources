@@ -10,13 +10,13 @@ info:
         - Check your plan usage information from the dashboard
         - Nector eforces strict param check. (Pass string if it requires string and so on)
         - UUID version we support is v4.
-        - Contact us at tech@nector.io for help
+        - Contact us at support@nector.io for help
 
     Click on export and copy-paste the openapi 3.0 spec inside postman. Get started by creating an account on https://merchant.nector.io
   contact:
     name: nector
     url: https://nector.io
-    email: tech@nector.io
+    email: support@nector.io
   version: 1.0.0
 servers:
   - url: https://platform.nector.io/api/v2/merchant
@@ -134,22 +134,57 @@ components:
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
 
+    merchant_create_publicofferredeems:
+      title: merchant_create_publicofferredeems
+      required:
+        - publicoffer_id
+      type: object
+      properties:
+        publicoffer_id:
+          type: string
+          description: (Required) (This needs to be offers _id value)
+        lead_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+      example:
+        publicoffer_id: <uuid> (Required) (This needs to be offers _id value)
+        lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+
+    merchant_create_publicofferrewards:
+      title: merchant_create_publicofferrewards
+      required:
+        - publicoffer_id
+      type: object
+      properties:
+        publicoffer_id:
+          type: string
+          description: (Required) (This needs to be offers _id value)
+        lead_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+      example:
+        publicoffer_id: <uuid> (Required) (This needs to be offers _id value)
+        lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+
     merchant_update_leads:
       title: merchant_update_leads
       type: object
       properties:
-        name:
-          type: string
-          description: (This is name of this user)
         metadetail:
-          $ref: "#/components/schemas/subschema_metadetail"
+          properties:
+            dob:
+              type: string
+              description: (This needs to be ISO format date only)
       example:
-        name: <string> (This is name of this user)
         metadetail:
-          email: <string> (This needs to be valid email)
-          mobile: <string> (Minimum length is 4) (Maximum length is 15)
-          country: <string> (This needs to one of the allowed countries) (Should be 3 character long and lowercase)
-          gender: <string> (This can only be one of male,female,other)
           dob: <string> (This needs to be ISO format date only)
 
     merchant_update_referredbyreferralcode:
@@ -158,26 +193,11 @@ components:
       required:
         - referred_by_referral_code
       properties:
-        customer_id:
-          type: string
-          description: (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
         referred_by_referral_code:
           type: string
           description: (This needs to be referrer leads referral_code value)
       example:
-        customer_id: <string> (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
         referred_by_referral_code: <string> (This needs to be referrer leads referral_code value)
-
-    merchant_update_wallettransactions:
-      title: merchant_update_wallettransactions
-      type: object
-      properties:
-        status:
-          type: string
-          description: (This can only be one of success)
-
-      example:
-        status: <string> (This can only be one of success)
 
     subschema_metadetail:
       title: subschema_metadetail
@@ -209,6 +229,10 @@ components:
           $ref: "#/components/schemas/subschema_trace_offer_reward"
         via_api_for_email:
           $ref: "#/components/schemas/subschema_trace_email_reward"
+        via_api_for_event:
+          $ref: "#/components/schemas/subschema_trace_event_reward"
+        via_api_for_webhook:
+          $ref: "#/components/schemas/subschema_trace_webhook_reward"
         params_for_activityrule:
           type: object
           properties:
@@ -230,6 +254,18 @@ components:
             randomkey_randomvalue_pair:
               type: string
               description: <string> (any randomvalue to pass to the emailtemplate) (upto 20 key-value pairs are allowed as part of params_for_email object)
+        params_for_event:
+          type: object
+          properties:
+            randomkey_randomvalue_pair:
+              type: string
+              description: <string> (any randomvalue to pass to the event) (upto 20 key-value pairs are allowed as part of params_for_event object)
+        params_for_webhook:
+          type: object
+          properties:
+            randomkey_randomvalue_pair:
+              type: string
+              description: <string> (any randomvalue to pass to the webhook) (upto 20 key-value pairs are allowed as part of params_for_webhook object)
 
     subschema_trace_wallet_reward:
       title: subschema_trace_wallet_reward
@@ -270,6 +306,31 @@ components:
           type: string
           description: (This needs to be emailtemplates _id value) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
 
+    subschema_trace_event_reward:
+      title: subschema_trace_event_reward
+      type: object
+      properties:
+        event_topic:
+          type: string
+          description: (Any string that needs to be passed as a topic) (This will be ignored if the trigger is not of type event reward or value override is not allowed)
+        integration_id:
+          type: string
+          description: (This needs to be integrations _id value) (This will be ignored if the trigger is not of type event reward or value override is not allowed)
+
+    subschema_trace_webhook_reward:
+      title: subschema_trace_webhook_reward
+      type: object
+      properties:
+        webhook_topic:
+          type: string
+          description: (Any string that needs to be passed as a topic) (This will be ignored if the trigger is not of type webhook reward or value override is not allowed)
+        webhook_uri:
+          type: string
+          description: (This needs to be uri to which the webhook will be called) (This will be ignored if the trigger is not of type webhook reward or value override is not allowed)
+        webhook_secret:
+          type: string
+          description: (This needs to be valid secret, based on this the business can verify the webhook) (This will be ignored if the trigger is not of type webhook reward or value override is not allowed)
+
   securitySchemes:
     basicAuth:
       type: http
@@ -289,11 +350,9 @@ paths:
         - Start Rewarding in 5 minutes
       summary: Reward Using Trigger
       description: |-
-        NOTICE - Other Rewarding APIs will be deprecated in favour of this API
-
-            - One single API for all your rewarding needs.
-            - Triggers can be created from the dashboard
-            - Contact us at tech@nector.io for help
+        - One single API for all your rewarding needs.
+        - Triggers can be created from the dashboard
+        - Contact us at support@nector.io for help
       parameters:
         - name: x-source
           in: header
@@ -319,131 +378,6 @@ paths:
             schema:
               $ref: "#/components/schemas/merchant_create_activities"
         required: true
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
-    get:
-      tags:
-        - Listing APIs
-      summary: Fetch Activities
-      description: Fetch activities based on various filters
-      parameters:
-        - name: lead_id
-          in: query
-          description: (Required) (This needs to be leads _id value)
-          required: true
-          schema:
-            type: string
-        - name: parent_id
-          in: query
-          description: (This needs to be activities parent_id value)
-          schema:
-            type: string
-        - name: parent_type
-          in: query
-          description: (This needs to be one of leads, coupons, wallettransactions, reviews, orders, triggers)
-          schema:
-            type: string
-        - name: event
-          in: query
-          description: (This needs to be one of lead_create, coupon_create, wallettransaction_create, review_create, order_create, referral_create, email_create)
-          schema:
-            type: string
-        - name: id
-          in: query
-          description: (This needs to be activities _id value)
-          schema:
-            type: string
-        - name: page
-          in: query
-          description: (Minimum is 1)
-          schema:
-            type: number
-        - name: limit
-          in: query
-          description: (Minimum is 1) (Maximum is 100)
-          schema:
-            type: number
-        - name: sort
-          in: query
-          description: (This can only be one of created_at,updated_at)
-          schema:
-            type: string
-        - name: sort_op
-          in: query
-          description: (This can only be one of ASC,DESC)
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
-  /activities-count:
-    get:
-      tags:
-        - Listing APIs
-      summary: Get Activity Count
-      description: Get count of activities made by a customer on a trigger
-      parameters:
-        - name: lead_id
-          in: query
-          description: (Required) (This needs to be leads _id value)
-          required: true
-          schema:
-            type: string
-        - name: parent_id
-          in: query
-          description: (Required) (This needs to be activities parent_id value)
-          required: true
-          schema:
-            type: string
-        - name: parent_type
-          in: query
-          description: (Required) (This needs to be one of leads, coupons, wallettransactions, reviews, orders, triggers)
-          required: true
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
 
       responses:
         "200":
@@ -606,16 +540,16 @@ paths:
           description: "200"
       security: []
 
-  /offers/{id}:
+  /publiccoupons/{id}:
     get:
       tags:
         - Listing APIs
-      summary: Get Offer
-      description: Get details of the offer
+      summary: Get Cross Selling Coupon
+      description: Get details of the cross selling coupon
       parameters:
         - name: id
           in: path
-          description: (Required) (This needs to be offers _id value)
+          description: (Required) (This can be any valid uuidv4 value or publiccoupons _id value)
           required: true
           schema:
             type: string
@@ -643,21 +577,27 @@ paths:
           description: "200"
       security: []
 
-  /offers:
+  /publiccoupons:
     get:
       tags:
         - Listing APIs
-      summary: Fetch Offers
-      description: Fetch offers based on various filters
+      summary: Fetch Cross Selling Coupons
+      description: Fetch cross selling coupons based on various filters
       parameters:
-        - name: visibility
+        - name: lead_id
           in: query
-          description: (This needs to be offers visibility value) (This can only be one of public,private)
+          description: (Required) (This needs to be leads _id value)
+          required: true
+          schema:
+            type: string
+        - name: publicoffer_id
+          in: query
+          description: (This needs to be publiccoupons offer_id value)
           schema:
             type: string
         - name: id
           in: query
-          description: (This needs to be offers _id value)
+          description: (This needs to be publiccoupons _id value)
           schema:
             type: string
         - name: page
@@ -704,19 +644,13 @@ paths:
           description: "200"
       security: []
 
-  /products/{id}:
-    get:
+  /publicofferredeems:
+    post:
       tags:
-        - Listing APIs
-      summary: Get Product
-      description: Get details of the product
+        - Offering
+      summary: Redeem Cross Selling Offer
+      description: Redeem a cross selling offer using wallet points.
       parameters:
-        - name: id
-          in: path
-          description: (Required) (This needs to be products _id value)
-          required: true
-          schema:
-            type: string
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
@@ -735,49 +669,25 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_publicofferredeems"
+        required: true
 
       responses:
         "200":
           description: "200"
       security: []
 
-  /products:
-    get:
+  /publicofferrewards:
+    post:
       tags:
-        - Listing APIs
-      summary: Fetch Products
-      description: Fetch products based on various filters
+        - Offering
+      summary: Reward Cross Selling Offer (Call this API from your backend, Only full access api key can invoke this API)
+      description: Reward a cross selling offer without using wallet points.
       parameters:
-        - name: visibility
-          in: query
-          description: (This needs to be products visibility value) (This can only be one of public,private)
-          schema:
-            type: string
-        - name: id
-          in: query
-          description: (This needs to be products _id value)
-          schema:
-            type: string
-        - name: page
-          in: query
-          description: (Minimum is 1)
-          schema:
-            type: number
-        - name: limit
-          in: query
-          description: (Minimum is 1) (Maximum is 100)
-          schema:
-            type: number
-        - name: sort
-          in: query
-          description: (This can only be one of created_at,updated_at)
-          schema:
-            type: string
-        - name: sort_op
-          in: query
-          description: (This can only be one of ASC,DESC)
-          schema:
-            type: string
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
@@ -796,223 +706,12 @@ paths:
           required: true
           schema:
             type: string
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
-  /orders/{id}:
-    get:
-      tags:
-        - Listing APIs
-      summary: Get Order
-      description: Get details of the order
-      parameters:
-        - name: reference_order_id
-          in: query
-          description: (This needs to be orders reference_order_id value) (This is the id of the order on the hst platform) (If this value is passed, it will be given first preference while searching order)
-          schema:
-            type: string
-        - name: reference_order_name
-          in: query
-          description: (This needs to be orders reference_order_name value) (This is the name of the order on the hst platform) (If this value is passed, it will be given second preference while searching order)
-          schema:
-            type: string
-        - name: id
-          in: path
-          description: (Required) (This needs to be products _id value) (If need to get order via order reference id pass any random uuid v4 value for id)
-          required: true
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
-  /orders:
-    get:
-      tags:
-        - Listing APIs
-      summary: Fetch Orders
-      description: Fetch orders based on various filters
-      parameters:
-        - name: status
-          in: query
-          description: (This needs to be orders _id value) (This can be one of pending,processing,completed,cancelled,refunded,unknown)
-          schema:
-            type: string
-        - name: financial_status
-          in: query
-          description: (This needs to be orders _id value) (This can be one of pending,paid,partially_paid,refunded,partially_refunded)
-          schema:
-            type: string
-        - name: delivery_status
-          in: query
-          description: (This needs to be orders _id value) (This can be one of pending,delivered,partially_delivered,undelivered,delivery_attempted)
-          schema:
-            type: string
-        - name: id
-          in: query
-          description: (This needs to be orders _id value)
-          schema:
-            type: string
-        - name: page
-          in: query
-          description: (Minimum is 1)
-          schema:
-            type: number
-        - name: limit
-          in: query
-          description: (Minimum is 1) (Maximum is 100)
-          schema:
-            type: number
-        - name: sort
-          in: query
-          description: (This can only be one of created_at,updated_at)
-          schema:
-            type: string
-        - name: sort_op
-          in: query
-          description: (This can only be one of ASC,DESC)
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
-  /productvariants/{id}:
-    get:
-      tags:
-        - Listing APIs
-      summary: Get Product Variant
-      description: Get details of the product variant
-      parameters:
-        - name: id
-          in: path
-          description: (Required) (This needs to be productvariants _id value)
-          required: true
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
-  /productvariants:
-    get:
-      tags:
-        - Listing APIs
-      summary: Fetch Product Variants
-      description: Fetch product variants based on various filters
-      parameters:
-        - name: product_id
-          in: query
-          description: (This needs to be products _id value)
-          required: true
-          schema:
-            type: string
-        - name: id
-          in: query
-          description: (This needs to be productvariants _id value)
-          schema:
-            type: string
-        - name: page
-          in: query
-          description: (Minimum is 1)
-          schema:
-            type: number
-        - name: limit
-          in: query
-          description: (Minimum is 1) (Maximum is 100)
-          schema:
-            type: number
-        - name: sort
-          in: query
-          description: (This can only be one of created_at,updated_at)
-          schema:
-            type: string
-        - name: sort_op
-          in: query
-          description: (This can only be one of ASC,DESC)
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_publicofferrewards"
+        required: true
 
       responses:
         "200":
@@ -1079,7 +778,7 @@ paths:
     put:
       tags:
         - User Tool
-      summary: Update User (Calls from readonly API key will not update value if it already exists)
+      summary: Update User (Used to update properties of the user, if the properties already exists it will not be update)
       description: Update details of the user
       parameters:
         - name: customer_id
@@ -1173,13 +872,18 @@ paths:
     put:
       tags:
         - User Tool
-      summary: Update Referred By Referral Code (Calls are supported only from full access API key)
-      description: Update referral details of the user
+      summary: Update Referred By Referral Code
+      description: Update referral details of the user in case of code based referral system
       parameters:
         - name: id
           in: path
           description: (Required) (This needs to be leads _id value) (If need to update user via customer id pass any random uuid v4 value for id)
           required: true
+          schema:
+            type: string
+        - name: customer_id
+          in: query
+          description: (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
           schema:
             type: string
         - name: x-source
@@ -1295,6 +999,43 @@ paths:
         - name: sort_op
           in: query
           description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /reviews/{id}:
+    get:
+      tags:
+        - Listing APIs
+      summary: Get Review
+      description: Get details of the review
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be reveiews _id value)
+          required: true
           schema:
             type: string
         - name: x-source
