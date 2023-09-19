@@ -187,18 +187,6 @@ components:
         metadetail:
           dob: <string> (This needs to be ISO format date only)
 
-    merchant_update_referredbyreferralcode:
-      title: merchant_update_referredbyreferralcode
-      type: object
-      required:
-        - referred_by_referral_code
-      properties:
-        referred_by_referral_code:
-          type: string
-          description: (This needs to be referrer leads referral_code value)
-      example:
-        referred_by_referral_code: <string> (This needs to be referrer leads referral_code value)
-
     subschema_metadetail:
       title: subschema_metadetail
       type: object
@@ -778,8 +766,8 @@ paths:
     put:
       tags:
         - User Tool
-      summary: Update User (Used to update properties of the user, if the properties already exists it will not be update)
-      description: Update details of the user
+      summary: Update User
+      description: Update details of the user, it will update properties of the user, if the properties already exists it will not be updated
       parameters:
         - name: customer_id
           in: query
@@ -862,54 +850,6 @@ paths:
           required: true
           schema:
             type: string
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
-  /leads-referred-by-referral-code/{id}:
-    put:
-      tags:
-        - User Tool
-      summary: Update Referred By Referral Code
-      description: Update referral details of the user in case of code based referral system
-      parameters:
-        - name: id
-          in: path
-          description: (Required) (This needs to be leads _id value) (If need to update user via customer id pass any random uuid v4 value for id)
-          required: true
-          schema:
-            type: string
-        - name: customer_id
-          in: query
-          description: (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/merchant_update_referredbyreferralcode"
-        required: true
 
       responses:
         "200":
