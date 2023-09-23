@@ -428,21 +428,6 @@ paths:
           description: (This needs to be coupons offer_id value)
           schema:
             type: string
-        - name: type
-          in: query
-          description: (This needs to be coupons type value) (This can only be one of public,private)
-          schema:
-            type: string
-        - name: source
-          in: query
-          description: (This needs to be coupons source value) (This can only be one of external,nector)
-          schema:
-            type: string
-        - name: status
-          in: query
-          description: (This needs to be coupons status value) (This can only be one of issued,redeemed)
-          schema:
-            type: string
         - name: id
           in: query
           description: (This needs to be coupons _id value)
