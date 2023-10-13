@@ -103,7 +103,6 @@ components:
               max: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
           via_api_for_offer:
             offer_id: <uuid> (This needs to be offers _id value) (This will be ignored if the trigger is not of type offer reward or value override is not allowed)
-            category_range: []
           via_api_for_email:
             subject: (Any string that needs to be passed as a subject) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
             emailtemplate_id: (This needs to be emailtemplates _id value) (This will be ignored if the trigger is not of type emailtool reward or value override is not allowed)
@@ -280,9 +279,6 @@ components:
         offer_id:
           type: string
           description: (This needs to be offers _id value) (This will be ignored if the rule is not of type offer reward or it does not allow value override)
-        category_range:
-          type: array
-          description: (These are offer categories) (This can only be from fashion,electronics,entertainment,food & grocery,beauty,fitness,other) (This will be ignored if the rule is not of type offer reward or it does not allow value override)
 
     subschema_trace_email_reward:
       title: subschema_trace_email_reward
