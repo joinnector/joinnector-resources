@@ -239,6 +239,84 @@ components:
         metadetail:
           dob: <string> (This needs to be ISO format date only)
 
+    merchant_create_wallettransactions:
+      title: merchant_create_wallettransactions
+      required:
+        - title
+        - description
+        - amount
+        - operation
+      type: object
+      properties:
+        lead_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        title:
+          type: string
+          description: (Required) (This needs to be wallettransaction title)
+        description:
+          type: string
+          description: (This needs to be wallettransaction description)
+        amount:
+          type: number
+          description: (Required) (This needs to be the coin amount)
+        hash:
+          type: string
+          description: (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector)
+        operation:
+          type: string
+          description: (Required) (This needs to be wallettransaction operation value) (This can only be one of cr,dr)
+      example:
+        lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        title: <string> (Required) (Required) (This needs to be wallet transaction title)
+        description: <string> (This needs to be wallet transaction description)
+        amount: 12
+        hash: <string> (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector)
+        operation: <string> (Required) (This needs to be wallettransaction operation value) (This can only be one of cr,dr)
+
+    merchant_create_creditwallettransactions:
+      title: merchant_create_creditwallettransactions
+      required:
+        - title
+        - description
+        - amount
+        - operation
+      type: object
+      properties:
+        lead_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        title:
+          type: string
+          description: (Required) (This needs to be creditwallettransaction title)
+        description:
+          type: string
+          description: (This needs to be creditwallettransaction description)
+        amount:
+          type: number
+          description: (Required) (This needs to be the credit amount, 1 credit = $1)
+        hash:
+          type: string
+          description: (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector)
+        operation:
+          type: string
+          description: (Required) (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr)
+      example:
+        lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        title: <string> (Required) (Required) (This needs to be wallet transaction title)
+        description: <string> (This needs to be wallet transaction description)
+        amount: 12
+        hash: <string> (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector)
+        operation: <string> (Required) (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr)
+
     merchant_create_reviews:
       title: merchant_create_reviews
       required:
@@ -466,6 +544,8 @@ components:
 tags:
   - name: User APIs
   - name: Trigger APIs (Easiest way to start rewarding with nector)
+  - name: Wallet Reward APIs
+  - name: Credit Wallet Reward APIs
   - name: Offer Reward APIs
   - name: Cross Selling Offer Reward APIs
   - name: Review APIs
@@ -1160,16 +1240,124 @@ paths:
           description: "200"
       security: []
 
+  /wallettransactions:
+    post:
+      tags:
+        - Wallet Reward APIs
+      summary: Create Wallet Transaction
+      description: Create a wallet transaction on behalf of the user. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_wallettransactions"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+    get:
+      tags:
+        - Wallet Reward APIs
+      summary: Fetch Wallet Transactions
+      description: Fetch wallet transactions based on various filters
+      parameters:
+        - name: lead_id
+          in: query
+          description: (Required) (This needs to be leads _id value)
+          required: true
+          schema:
+            type: string
+        - name: hash
+          in: query
+          description: (Minimum length is 1) (Maximum length is 128) (This needs to be wallettransaction hash value)
+          schema:
+            type: string
+        - name: operation
+          in: query
+          description: (This needs to be wallettransaction operation value) (This can only be one of cr,dr)
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be wallettransaction _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 100)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /wallettransactions/{id}:
     get:
       tags:
-        - Various Listing APIs
-      summary: Get WalletTransaction
+        - Wallet Reward APIs
+      summary: Get Wallet Transaction
       description: Get details of the wallet transaction
       parameters:
         - name: id
           in: path
-          description: (Required) (This needs to be wallettransactions _id value)
+          description: (Required) (This needs to be wallettransaction _id value)
           required: true
           schema:
             type: string
@@ -1197,12 +1385,48 @@ paths:
           description: "200"
       security: []
 
-  /wallettransactions:
+  /creditwallettransactions:
+    post:
+      tags:
+        - Credit Wallet Reward APIs
+      summary: Create Credit Wallet Transaction (Limited Access)
+      description: Create credit wallet transaction on behalf of the user. This is secondary wallet which should be used for giftcards, return etc. The default mapping is 1 credit = $1. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_creditwallettransactions"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
     get:
       tags:
-        - Various Listing APIs
-      summary: Fetch WalletTransactions
-      description: Fetch wallet transactions based on various filters
+        - Credit Wallet Reward APIs
+      summary: Fetch Credit Wallet Transaction (Limited Access)
+      description: Fetch credit wallet transactions based on various filters
       parameters:
         - name: lead_id
           in: query
@@ -1212,17 +1436,17 @@ paths:
             type: string
         - name: hash
           in: query
-          description: (Minimum length is 1) (Maximum length is 128) (This needs to be wallettransactions hash value)
+          description: (Minimum length is 1) (Maximum length is 128) (This needs to be creditwallettransaction hash value)
           schema:
             type: string
         - name: operation
           in: query
-          description: (This needs to be wallettransactions operation value) (This can only be one of cr,dr)
+          description: (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr)
           schema:
             type: string
         - name: id
           in: query
-          description: (This needs to be wallettransactions _id value)
+          description: (This needs to be creditwallettransaction _id value)
           schema:
             type: string
         - name: page
@@ -1272,86 +1496,14 @@ paths:
   /creditwallettransactions/{id}:
     get:
       tags:
-        - Various Listing APIs
-      summary: Get CreditWalletTransaction
+        - Credit Wallet Reward APIs
+      summary: Get Credit Wallet Transaction (Limited Access)
       description: Get details of the credit wallet transaction
       parameters:
         - name: id
           in: path
-          description: (Required) (This needs to be creditwallettransactions _id value)
+          description: (Required) (This needs to be creditwallettransaction _id value)
           required: true
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
-  /creditwallettransactions:
-    get:
-      tags:
-        - Various Listing APIs
-      summary: Fetch CreditWalletTransaction
-      description: Fetch credit wallet transactions based on various filters
-      parameters:
-        - name: lead_id
-          in: query
-          description: (Required) (This needs to be leads _id value)
-          required: true
-          schema:
-            type: string
-        - name: hash
-          in: query
-          description: (Minimum length is 1) (Maximum length is 128) (This needs to be creditwallettransactions hash value)
-          schema:
-            type: string
-        - name: operation
-          in: query
-          description: (This needs to be creditwallettransactions operation value) (This can only be one of cr,dr)
-          schema:
-            type: string
-        - name: id
-          in: query
-          description: (This needs to be creditwallettransactions _id value)
-          schema:
-            type: string
-        - name: page
-          in: query
-          description: (Minimum is 1)
-          schema:
-            type: number
-        - name: limit
-          in: query
-          description: (Minimum is 1) (Maximum is 100)
-          schema:
-            type: number
-        - name: sort
-          in: query
-          description: (This can only be one of created_at,updated_at)
-          schema:
-            type: string
-        - name: sort_op
-          in: query
-          description: (This can only be one of ASC,DESC)
           schema:
             type: string
         - name: x-source
@@ -1383,7 +1535,7 @@ paths:
       tags:
         - Review APIs
       summary: Create Review
-      description: Create review on behalf of the user
+      description: Create review on behalf of the user. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
       parameters:
         - name: x-source
           in: header
@@ -1573,7 +1725,7 @@ paths:
       tags:
         - QnA APIs
       summary: Create QnA
-      description: Create qna on behalf of the user
+      description: Create qna on behalf of the user. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
       parameters:
         - name: x-source
           in: header
