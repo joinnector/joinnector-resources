@@ -596,7 +596,7 @@ paths:
   /coupons/{id}:
     get:
       tags:
-        - Various Listing APIs
+        - Offer Reward APIs
       summary: Get Coupon
       description: Get details of the coupon
       parameters:
@@ -633,7 +633,7 @@ paths:
   /coupons:
     get:
       tags:
-        - Various Listing APIs
+        - Offer Reward APIs
       summary: Fetch Coupons
       description: Fetch coupons based on various filters
       parameters:
@@ -878,7 +878,7 @@ paths:
   /publiccoupons/{id}:
     get:
       tags:
-        - Various Listing APIs
+        - Cross Selling Offer Reward APIs
       summary: Get Cross Selling Coupon
       description: Get details of the cross selling coupon
       parameters:
@@ -915,7 +915,7 @@ paths:
   /publiccoupons:
     get:
       tags:
-        - Various Listing APIs
+        - Cross Selling Offer Reward APIs
       summary: Fetch Cross Selling Coupons
       description: Fetch cross selling coupons based on various filters
       parameters:
