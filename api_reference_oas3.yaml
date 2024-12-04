@@ -199,7 +199,7 @@ components:
       properties:
         customer_id:
           type: string
-          description: (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+          description: (Minimum length is 1) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
         name:
           type: string
           description: (This is full name of the user ex. John Wick) (Maximum length is 200)
@@ -218,7 +218,7 @@ components:
               type: string
               description: (This needs to be ISO format date only)
       example:
-        customer_id: <string> (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        customer_id: <string> (Minimum length is 1) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
         name: <string> (This is full name of the user ex. John Wick) (Maximum length is 200)
         metadetail:
           email: <string> (One of mobile or email is required) (One of mobile or email is required) (This needs to be valid email)
@@ -371,9 +371,9 @@ components:
       scheme: basic
 
 tags:
-  - name: Trigger Execution APIs
-  - name: Offer Reward APIs
   - name: User APIs
+  - name: Trigger Execution APIs (Easiest way to start rewarding with nector)
+  - name: Offer Reward APIs
   - name: Various Listing APIs
 
 paths:
@@ -877,7 +877,6 @@ paths:
           description: "200"
       security: []
 
-
   /triggers:
     get:
       tags:
@@ -980,7 +979,7 @@ paths:
       parameters:
         - name: customer_id
           in: query
-          description: (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
+          description: (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
           schema:
             type: string
         - name: id
@@ -1027,7 +1026,7 @@ paths:
       parameters:
         - name: customer_id
           in: query
-          description: (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while searching user)
+          description: (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while searching user)
           schema:
             type: string
         - name: referral_code
@@ -1411,6 +1410,109 @@ paths:
         - name: reference_product_id
           in: query
           description: (This needs to be products reference_product_id value)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /qna/{id}:
+    get:
+      tags:
+        - Various Listing APIs
+      summary: Get QnA
+      description: Get details of the qna
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be reveiews _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /qnas:
+    get:
+      tags:
+        - Various Listing APIs
+      summary: Fetch QnAs
+      description: Fetch qnas based on various filters
+      parameters:
+        - name: reference_product_source
+          in: query
+          description: (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+          schema:
+            type: string
+        - name: reference_product_id
+          in: query
+          description: (This needs to be products reference_product_id value)
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be qnas _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 100)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
           schema:
             type: string
         - name: x-source
