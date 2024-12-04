@@ -69,7 +69,7 @@ components:
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id:
           type: string
-          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+          description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
         referral_code:
           type: string
           description: (Minimum length is 1) (Maximum length is 128) (If user exists it will be ignored)
@@ -84,7 +84,7 @@ components:
       example:
         trigger_id: <uuid> (Required) (This needs to be triggers _id value)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
-        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
         referral_code: <string> (Minimum length is 1) (Maximum length is 128) (If user does not exists it will get created with passed referral_code value else a random 8 digit referral_code will be generated for this user)
         name: <string> (This is name of this user)
         metadetail:
@@ -127,11 +127,11 @@ components:
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id:
           type: string
-          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+          description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
       example:
         offer_id: <uuid> (Required) (This needs to be offers _id value)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
-        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
 
     merchant_create_offerredeems:
       title: merchant_create_offerredeems
@@ -147,11 +147,11 @@ components:
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id:
           type: string
-          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+          description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
       example:
         offer_id: <uuid> (Required) (This needs to be offers _id value)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
-        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
 
     merchant_create_publicofferredeems:
       title: merchant_create_publicofferredeems
@@ -167,11 +167,11 @@ components:
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id:
           type: string
-          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+          description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
       example:
         publicoffer_id: <uuid> (Required) (This needs to be publicoffers _id value)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
-        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
 
     merchant_create_publicofferrewards:
       title: merchant_create_publicofferrewards
@@ -187,11 +187,11 @@ components:
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id:
           type: string
-          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+          description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
       example:
         publicoffer_id: <uuid> (Required) (This needs to be publicoffers _id value)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
-        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
 
     merchant_create_leads:
       title: merchant_create_leads
@@ -199,7 +199,7 @@ components:
       properties:
         customer_id:
           type: string
-          description: (Required) (Minimum length is 1) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
+          description: (Required) (Make sure this is not predictable value. ex any uuid value) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
         name:
           type: string
           description: (Required) (This is full name of the user ex. John Wick) (Maximum length is 200)
@@ -218,7 +218,7 @@ components:
               type: string
               description: (This needs to be ISO format date only)
       example:
-        customer_id: <string> (Required) (Minimum length is 1) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
+        customer_id: <string> (Required) (Make sure this is not predictable value. ex any uuid value) (Minimum length is 1) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
         name: <string> (Required) (This is full name of the user ex. John Wick) (Maximum length is 200)
         metadetail:
           email: <string> (One of mobile or email is required) (One of mobile or email is required) (This needs to be valid email)
@@ -253,7 +253,7 @@ components:
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id:
           type: string
-          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+          description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
         title:
           type: string
           description: (Required) (This needs to be wallettransaction title)
@@ -271,7 +271,7 @@ components:
           description: (Required) (This needs to be wallettransaction operation value) (This can only be one of cr,dr)
       example:
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
-        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
         title: <string> (Required) (Required) (This needs to be wallet transaction title)
         description: <string> (This needs to be wallet transaction description)
         amount: 12
@@ -292,7 +292,7 @@ components:
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id:
           type: string
-          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+          description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
         title:
           type: string
           description: (Required) (This needs to be creditwallettransaction title)
@@ -310,7 +310,7 @@ components:
           description: (Required) (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr)
       example:
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
-        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
         title: <string> (Required) (Required) (This needs to be wallet transaction title)
         description: <string> (This needs to be wallet transaction description)
         amount: 12
@@ -1155,7 +1155,7 @@ paths:
       parameters:
         - name: customer_id
           in: query
-          description: (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
+          description: (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
           schema:
             type: string
         - name: id
@@ -1202,7 +1202,7 @@ paths:
       parameters:
         - name: customer_id
           in: query
-          description: (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while searching user)
+          description: (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while searching user)
           schema:
             type: string
         - name: referral_code
@@ -1291,7 +1291,7 @@ paths:
             type: string
         - name: hash
           in: query
-          description: (Minimum length is 1) (Maximum length is 128) (This needs to be wallettransaction hash value)
+          description: (Maximum length is 64) (This needs to be wallettransaction hash value)
           schema:
             type: string
         - name: operation
@@ -1436,7 +1436,7 @@ paths:
             type: string
         - name: hash
           in: query
-          description: (Minimum length is 1) (Maximum length is 128) (This needs to be creditwallettransaction hash value)
+          description: (Maximum length is 64) (This needs to be creditwallettransaction hash value)
           schema:
             type: string
         - name: operation
