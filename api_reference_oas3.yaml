@@ -1535,7 +1535,7 @@ paths:
       tags:
         - Review APIs
       summary: Create Review
-      description: Create review on behalf of the user. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      description: Create review on behalf of the user.
       parameters:
         - name: x-source
           in: header
@@ -1725,7 +1725,7 @@ paths:
       tags:
         - QnA APIs
       summary: Create QnA
-      description: Create qna on behalf of the user. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      description: Create qna on behalf of the user.
       parameters:
         - name: x-source
           in: header
