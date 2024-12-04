@@ -9,7 +9,7 @@ info:
         - Try and use cachefront.nector.io instead of platform.nector.io as much as possible for GET API calls
         - A maximum of 100 API calls per minute is allowed
         - Check your plan usage information from the dashboard
-        - Nector eforces strict param check. (Pass string if it requires string and so on)
+        - Nector enforces strict param check. (Pass string if it requires string and so on)
         - We only UUIDV4
         - Contact us at support@nector.io for any help
 
