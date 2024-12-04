@@ -593,109 +593,6 @@ paths:
           description: "200"
       security: []
 
-  /coupons/{id}:
-    get:
-      tags:
-        - Offer Reward APIs
-      summary: Get Coupon
-      description: Get details of the coupon
-      parameters:
-        - name: id
-          in: path
-          description: (Required) (This can be any valid uuidv4 value or coupons _id value)
-          required: true
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
-
-      responses:
-        "200":
-          description: "200"
-      security: []
-
-  /coupons:
-    get:
-      tags:
-        - Offer Reward APIs
-      summary: Fetch Coupons
-      description: Fetch coupons based on various filters
-      parameters:
-        - name: lead_id
-          in: query
-          description: (Required) (This needs to be leads _id value)
-          required: true
-          schema:
-            type: string
-        - name: offer_id
-          in: query
-          description: (This needs to be coupons offer_id value)
-          schema:
-            type: string
-        - name: id
-          in: query
-          description: (This needs to be coupons _id value)
-          schema:
-            type: string
-        - name: page
-          in: query
-          description: (Minimum is 1)
-          schema:
-            type: number
-        - name: limit
-          in: query
-          description: (Minimum is 1) (Maximum is 100)
-          schema:
-            type: number
-        - name: sort
-          in: query
-          description: (This can only be one of created_at,updated_at)
-          schema:
-            type: string
-        - name: sort_op
-          in: query
-          description: (This can only be one of ASC,DESC)
-          schema:
-            type: string
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
-
-      responses:
-        "200":
-          description: "200"
-      security: []
 
   /referrals/{id}:
     get:
@@ -875,16 +772,16 @@ paths:
           description: "200"
       security: []
 
-  /publiccoupons/{id}:
+  /coupons/{id}:
     get:
       tags:
-        - Cross Selling Offer Reward APIs
-      summary: Get Cross Selling Coupon
-      description: Get details of the cross selling coupon
+        - Offer Reward APIs
+      summary: Get Coupon
+      description: Get details of the coupon
       parameters:
         - name: id
           in: path
-          description: (Required) (This can be any valid uuidv4 value or publiccoupons _id value)
+          description: (Required) (This can be any valid uuidv4 value or coupons _id value)
           required: true
           schema:
             type: string
@@ -912,12 +809,12 @@ paths:
           description: "200"
       security: []
 
-  /publiccoupons:
+  /coupons:
     get:
       tags:
-        - Cross Selling Offer Reward APIs
-      summary: Fetch Cross Selling Coupons
-      description: Fetch cross selling coupons based on various filters
+        - Offer Reward APIs
+      summary: Fetch Coupons
+      description: Fetch coupons based on various filters
       parameters:
         - name: lead_id
           in: query
@@ -925,14 +822,14 @@ paths:
           required: true
           schema:
             type: string
-        - name: publicoffer_id
+        - name: offer_id
           in: query
-          description: (This needs to be publiccoupons offer_id value)
+          description: (This needs to be coupons offer_id value)
           schema:
             type: string
         - name: id
           in: query
-          description: (This needs to be publiccoupons _id value)
+          description: (This needs to be coupons _id value)
           schema:
             type: string
         - name: page
@@ -1047,6 +944,110 @@ paths:
             schema:
               $ref: "#/components/schemas/merchant_create_publicofferredeems"
         required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /publiccoupons/{id}:
+    get:
+      tags:
+        - Cross Selling Offer Reward APIs
+      summary: Get Cross Selling Coupon
+      description: Get details of the cross selling coupon
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This can be any valid uuidv4 value or publiccoupons _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /publiccoupons:
+    get:
+      tags:
+        - Cross Selling Offer Reward APIs
+      summary: Fetch Cross Selling Coupons
+      description: Fetch cross selling coupons based on various filters
+      parameters:
+        - name: lead_id
+          in: query
+          description: (Required) (This needs to be leads _id value)
+          required: true
+          schema:
+            type: string
+        - name: publicoffer_id
+          in: query
+          description: (This needs to be publiccoupons offer_id value)
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be publiccoupons _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 100)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
 
       responses:
         "200":
