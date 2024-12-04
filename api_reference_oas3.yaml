@@ -4,16 +4,16 @@ info:
   description: |-
     Nector - Powerful Customer Engagement & Loyalty Platform
 
-        - DO NOT EXPOSE FULL ACCESS API KEY
-        - Only use readonly APIs if integrating with frontend apps or website.
+        - Never expose write Access or full access API key in frontend
+        - Use read only api key as much as possible
         - Try and use cachefront.nector.io instead of platform.nector.io as much as possible for GET API calls
-        - A maximum of 100 API calls per minute is allowed
+        - A maximum of 60 API calls are allowed per minute
         - Check your plan usage information from the dashboard
         - Nector enforces strict param check. (Pass string if it requires string and so on)
-        - We only UUIDV4
-        - Contact us at support@nector.io for any help
+        - We only support UUIDV4
+        - Contact us at support@nector.io for more information
 
-    Click on export and copy-paste the openapi 3.0 spec inside postman. Get started by creating an account on https://merchant.nector.io
+    Get started by creating an account on https://merchant.nector.io
   contact:
     name: nector
     url: https://nector.io?utm_source=api_doc
@@ -592,7 +592,6 @@ paths:
         "200":
           description: "200"
       security: []
-
 
   /referrals/{id}:
     get:
