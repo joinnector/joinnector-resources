@@ -803,6 +803,43 @@ paths:
           description: "200"
       security: []
 
+  /publicofferrewards:
+    post:
+      tags:
+        - Offer Reward APIs
+      summary: Reward Cross Selling Offer
+      description: Reward a cross selling offer without using wallet points. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_publicofferrewards"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /publicofferredeems:
     post:
       tags:
@@ -840,42 +877,6 @@ paths:
           description: "200"
       security: []
 
-  /publicofferrewards:
-    post:
-      tags:
-        - Offer Reward APIs
-      summary: Reward Cross Selling Offer
-      description: Reward a cross selling offer without using wallet points. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
-      parameters:
-        - name: x-source
-          in: header
-          description: (Required) (This can only be one of mobile,unix,web)
-          required: true
-          schema:
-            type: string
-        - name: x-apikey
-          in: header
-          description: (Required) (This needs to be your apikey)
-          required: true
-          schema:
-            type: string
-        - name: x-workspaceid
-          in: header
-          description: (Required) (This needs to be your workspaceid)
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/merchant_create_publicofferrewards"
-        required: true
-
-      responses:
-        "200":
-          description: "200"
-      security: []
 
   /triggers:
     get:
