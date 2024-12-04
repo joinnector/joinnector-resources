@@ -89,8 +89,8 @@ components:
         name: <string> (This is name of this user)
         metadetail:
           email: <string> (One of mobile or email is required) (This needs to be valid email)
-          mobile: (One of mobile or email is required) (Minimum length is 4) (Maximum length is 15)
-          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase)
+          mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
+          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
           dob: <string> (This needs to be ISO format date only)
         trace:
           via_api_for_wallet:
@@ -199,10 +199,10 @@ components:
       properties:
         customer_id:
           type: string
-          description: (Minimum length is 1) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
+          description: (Required) (Minimum length is 1) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
         name:
           type: string
-          description: (This is full name of the user ex. John Wick) (Maximum length is 200)
+          description: (Required) (This is full name of the user ex. John Wick) (Maximum length is 200)
         metadetail:
           properties:
             email:
@@ -210,20 +210,20 @@ components:
               description: (One of mobile or email is required) (This needs to be valid email)
             mobile:
               type: string
-              description: (One of mobile or email is required) (Minimum length is 4) (Maximum length is 15)
+              description: (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
             country:
               type: string
-              description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase)
+              description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
             dob:
               type: string
               description: (This needs to be ISO format date only)
       example:
-        customer_id: <string> (Minimum length is 1) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
-        name: <string> (This is full name of the user ex. John Wick) (Maximum length is 200)
+        customer_id: <string> (Required) (Minimum length is 1) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
+        name: <string> (Required) (This is full name of the user ex. John Wick) (Maximum length is 200)
         metadetail:
           email: <string> (One of mobile or email is required) (One of mobile or email is required) (This needs to be valid email)
-          mobile: <string> (One of mobile or email is required) (Minimum length is 4) (Maximum length is 15)
-          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase)
+          mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
+          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
           dob: <string> (This needs to be ISO format date only)
 
     merchant_update_leads:
@@ -239,6 +239,99 @@ components:
         metadetail:
           dob: <string> (This needs to be ISO format date only)
 
+    merchant_create_reviews:
+      title: merchant_create_reviews
+      required:
+        - reference_product_source
+        - reference_product_id
+        - name
+        - rating
+        - description
+      type: object
+      properties:
+        metadetail:
+          properties:
+            email:
+              type: string
+              description: (One of mobile or email is required) (This needs to be valid email)
+            mobile:
+              type: string
+              description: (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
+            country:
+              type: string
+              description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+        order_id:
+          type: string
+          description: (This needs to be orders _id value) (If this is passed then the review will be attched against an order and the review will be marked as verified)
+        reference_product_source:
+          type: string
+          description: (Required) (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+        reference_product_id:
+          type: string
+          description: (Required) (This needs to be products reference_product_id value)
+        name:
+          type: string
+          description: (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the review)
+        rating:
+          type: number
+          description: (Required) (Minimum is 1) (Maximum is 5) (This needs to be rating of the review)
+        description:
+          type: string
+          description: (Required) (This needs to be description of the review)
+      example:
+        metadetail:
+          email: <string> (One of mobile or email is required) (One of mobile or email is required) (This needs to be valid email)
+          mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
+          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+        order_id: <uuid> (This needs to be orders _id value) (If this is passed then the review will be attched against an order and the review will be marked as verified)
+        reference_product_source: <string> (Required) (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+        reference_product_id: <string> (Required) (This needs to be products reference_product_id value)
+        name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the review)
+        rating: 4
+        description: <string> (Required) (This needs to be description of the review)
+
+    merchant_create_qnas:
+      title: merchant_create_qnas
+      required:
+        - reference_product_source
+        - reference_product_id
+        - name
+        - question
+      type: object
+      properties:
+        metadetail:
+          properties:
+            email:
+              type: string
+              description: (One of mobile or email is required) (This needs to be valid email)
+            mobile:
+              type: string
+              description: (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
+            country:
+              type: string
+              description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+        reference_product_source:
+          type: string
+          description: (Required) (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+        reference_product_id:
+          type: string
+          description: (Required) (This needs to be products reference_product_id value)
+        name:
+          type: string
+          description: (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the qna)
+        question:
+          type: string
+          description: (Required) (This needs to be the question of the user)
+      example:
+        metadetail:
+          email: <string> (One of mobile or email is required) (One of mobile or email is required) (This needs to be valid email)
+          mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
+          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+        reference_product_source: <string> (Required) (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+        reference_product_id: <string> (Required) (This needs to be products reference_product_id value)
+        name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the qna)
+        question: <string> (Required) (This needs to be the question of the user)
+
     subschema_metadetail:
       title: subschema_metadetail
       type: object
@@ -248,10 +341,10 @@ components:
           description: (One of mobile or email is required) (This needs to be valid email)
         mobile:
           type: string
-          description: (One of mobile or email is required) (Minimum length is 4) (Maximum length is 15)
+          description: (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
         country:
           type: string
-          description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase)
+          description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
         dob:
           type: string
           description: (This needs to be ISO format date only)
@@ -372,8 +465,10 @@ components:
 
 tags:
   - name: User APIs
-  - name: Trigger Execution APIs (Easiest way to start rewarding with nector)
+  - name: Trigger APIs (Easiest way to start rewarding with nector)
   - name: Offer Reward APIs
+  - name: Review APIs
+  - name: QnA APIs
   - name: Various Listing APIs
 
 paths:
@@ -1020,7 +1115,7 @@ paths:
 
     get:
       tags:
-        - Various Listing APIs
+        - User APIs
       summary: Get User
       description: Get details of the user
       parameters:
@@ -1282,19 +1377,13 @@ paths:
           description: "200"
       security: []
 
-  /reviews/{id}:
-    get:
+  /reviews:
+    post:
       tags:
-        - Various Listing APIs
-      summary: Get Review
-      description: Get details of the review
+        - Review APIs
+      summary: Create Review
+      description: Create review on behalf of the user
       parameters:
-        - name: id
-          in: path
-          description: (Required) (This needs to be reveiews _id value)
-          required: true
-          schema:
-            type: string
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
@@ -1313,16 +1402,21 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_reviews"
+        required: true
 
       responses:
         "200":
           description: "200"
       security: []
 
-  /reviews:
     get:
       tags:
-        - Various Listing APIs
+        - Review APIs
       summary: Fetch Reviews
       description: Fetch reviews based on various filters
       parameters:
@@ -1395,10 +1489,47 @@ paths:
           description: "200"
       security: []
 
+  /reviews/{id}:
+    get:
+      tags:
+        - Review APIs
+      summary: Get Review
+      description: Get details of the review
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be reveiews _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /reviews-count:
     get:
       tags:
-        - Various Listing APIs
+        - Review APIs
       summary: Get Review Count
       description: Get review count for the passed filters
       parameters:
@@ -1436,19 +1567,13 @@ paths:
           description: "200"
       security: []
 
-  /qna/{id}:
-    get:
+  /qnas:
+    post:
       tags:
-        - Various Listing APIs
-      summary: Get QnA
-      description: Get details of the qna
+        - QnA APIs
+      summary: Create QnA
+      description: Create qna on behalf of the user
       parameters:
-        - name: id
-          in: path
-          description: (Required) (This needs to be reveiews _id value)
-          required: true
-          schema:
-            type: string
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
@@ -1467,16 +1592,21 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_qnas"
+        required: true
 
       responses:
         "200":
           description: "200"
       security: []
 
-  /qnas:
     get:
       tags:
-        - Various Listing APIs
+        - QnA APIs
       summary: Fetch QnAs
       description: Fetch qnas based on various filters
       parameters:
@@ -1513,6 +1643,43 @@ paths:
         - name: sort_op
           in: query
           description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /qna/{id}:
+    get:
+      tags:
+        - QnA APIs
+      summary: Get QnA
+      description: Get details of the qna
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be reveiews _id value)
+          required: true
           schema:
             type: string
         - name: x-source
