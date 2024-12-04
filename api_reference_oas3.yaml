@@ -88,10 +88,9 @@ components:
         referral_code: <string> (Minimum length is 1) (Maximum length is 128) (If user does not exists it will get created with passed referral_code value else a random 8 digit referral_code will be generated for this user)
         name: <string> (This is name of this user)
         metadetail:
-          email: <string> (This needs to be valid email)
-          mobile: <string> (Minimum length is 4) (Maximum length is 15)
-          country: <string> (This needs to one of the allowed countries) (Should be 3 character long and lowercase)
-          gender: <string> (This can only be one of male,female,other)
+          email: <string> (One of mobile or email is required) (This needs to be valid email)
+          mobile: (One of mobile or email is required) (Minimum length is 4) (Maximum length is 15)
+          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase)
           dob: <string> (This needs to be ISO format date only)
         trace:
           via_api_for_wallet:
@@ -113,6 +112,26 @@ components:
             amount: 0
           params_for_email:
             randomkey_randomvalue_pair: <string> (any randomkey and randomvalue pair to pass to the emailtemplate) (upto 20 key-value pairs are allowed as part of params_for_email object)
+
+    merchant_create_offerrewards:
+      title: merchant_create_offerrewards
+      required:
+        - offer_id
+      type: object
+      properties:
+        offer_id:
+          type: string
+          description: (Required) (This needs to be offers _id value)
+        lead_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+      example:
+        offer_id: <uuid> (Required) (This needs to be offers _id value)
+        lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
+        customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
 
     merchant_create_offerredeems:
       title: merchant_create_offerredeems
@@ -150,7 +169,7 @@ components:
           type: string
           description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
       example:
-        publicoffer_id: <uuid> (Required) (This needs to be offers _id value)
+        publicoffer_id: <uuid> (Required) (This needs to be publicoffers _id value)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
 
@@ -170,9 +189,42 @@ components:
           type: string
           description: (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
       example:
-        publicoffer_id: <uuid> (Required) (This needs to be offers _id value)
+        publicoffer_id: <uuid> (Required) (This needs to be publicoffers _id value)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+
+    merchant_create_leads:
+      title: merchant_create_leads
+      type: object
+      properties:
+        customer_id:
+          type: string
+          description: (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        name:
+          type: string
+          description: (This is full name of the user ex. John Wick) (Maximum length is 200)
+        metadetail:
+          properties:
+            email:
+              type: string
+              description: (One of mobile or email is required) (This needs to be valid email)
+            mobile:
+              type: string
+              description: (One of mobile or email is required) (Minimum length is 4) (Maximum length is 15)
+            country:
+              type: string
+              description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase)
+            dob:
+              type: string
+              description: (This needs to be ISO format date only)
+      example:
+        customer_id: <string> (Minimum length is 1) (Maximum length is 128) (This needs to be leads customer_id value)
+        name: <string> (This is full name of the user ex. John Wick) (Maximum length is 200)
+        metadetail:
+          email: <string> (One of mobile or email is required) (One of mobile or email is required) (This needs to be valid email)
+          mobile: <string> (One of mobile or email is required) (Minimum length is 4) (Maximum length is 15)
+          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase)
+          dob: <string> (This needs to be ISO format date only)
 
     merchant_update_leads:
       title: merchant_update_leads
@@ -193,16 +245,13 @@ components:
       properties:
         email:
           type: string
-          description: (This needs to be valid email)
+          description: (One of mobile or email is required) (This needs to be valid email)
         mobile:
           type: string
-          description: <string> (Minimum length is 4) (Maximum length is 15)
+          description: (One of mobile or email is required) (Minimum length is 4) (Maximum length is 15)
         country:
           type: string
-          description: <string> (This needs to one of the allowed countries) (Should be 3 character long and lowercase)
-        gender:
-          type: string
-          description: (This can only be one of male,female,other)
+          description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase)
         dob:
           type: string
           description: (This needs to be ISO format date only)
@@ -322,17 +371,16 @@ components:
       scheme: basic
 
 tags:
-  - name: Start Rewarding in 5 minutes
-  - name: Offering
-  - name: User Tool
-  - name: Listing APIs
-  - name: Misc
+  - name: Trigger Execution APIs
+  - name: Offer Reward APIs
+  - name: User APIs
+  - name: Various Listing APIs
 
 paths:
   /activities:
     post:
       tags:
-        - Start Rewarding in 5 minutes
+        - Trigger Execution APIs
       summary: Reward Using Trigger
       description: |-
         - One single API for all your rewarding needs.
@@ -372,7 +420,7 @@ paths:
   /coupons/{id}:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Get Coupon
       description: Get details of the coupon
       parameters:
@@ -409,7 +457,7 @@ paths:
   /coupons:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Fetch Coupons
       description: Fetch coupons based on various filters
       parameters:
@@ -476,7 +524,7 @@ paths:
   /referrals/{id}:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Get Referral
       description: Get details of the referral
       parameters:
@@ -513,7 +561,7 @@ paths:
   /referrals:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Fetch Referrals
       description: Fetch referrals based on various filters
       parameters:
@@ -577,10 +625,47 @@ paths:
           description: "200"
       security: []
 
+  /offerrewards:
+    post:
+      tags:
+        - Offer Reward APIs
+      summary: Reward Offer
+      description: Reward an offer without using wallet points. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_offerrewards"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /offerredeems:
     post:
       tags:
-        - Offering
+        - Offer Reward APIs
       summary: Redeem Offer
       description: Redeem a offer using wallet points.
       parameters:
@@ -617,7 +702,7 @@ paths:
   /publiccoupons/{id}:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Get Cross Selling Coupon
       description: Get details of the cross selling coupon
       parameters:
@@ -654,7 +739,7 @@ paths:
   /publiccoupons:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Fetch Cross Selling Coupons
       description: Fetch cross selling coupons based on various filters
       parameters:
@@ -721,7 +806,7 @@ paths:
   /publicofferredeems:
     post:
       tags:
-        - Offering
+        - Offer Reward APIs
       summary: Redeem Cross Selling Offer
       description: Redeem a cross selling offer using wallet points.
       parameters:
@@ -758,7 +843,7 @@ paths:
   /publicofferrewards:
     post:
       tags:
-        - Offering
+        - Offer Reward APIs
       summary: Reward Cross Selling Offer
       description: Reward a cross selling offer without using wallet points. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
       parameters:
@@ -795,7 +880,7 @@ paths:
   /triggers:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Fetch Triggers (Content)
       description: Fetch triggers (content) based on various filters
       parameters:
@@ -848,10 +933,47 @@ paths:
           description: "200"
       security: []
 
+  /leads:
+    post:
+      tags:
+        - User APIs
+      summary: Create User
+      description: Creates a new customer on nector aginst your business workspace. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_leads"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /leads/{id}:
     put:
       tags:
-        - User Tool
+        - User APIs
       summary: Update User
       description: Update details of the user, it will update properties of the user, if the properties already exists it will not be updated
       parameters:
@@ -898,7 +1020,7 @@ paths:
 
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Get User
       description: Get details of the user
       parameters:
@@ -945,7 +1067,7 @@ paths:
   /wallettransactions/{id}:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Get WalletTransaction
       description: Get details of the wallet transaction
       parameters:
@@ -982,7 +1104,7 @@ paths:
   /wallettransactions:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Fetch WalletTransactions
       description: Fetch wallet transactions based on various filters
       parameters:
@@ -1051,10 +1173,119 @@ paths:
           description: "200"
       security: []
 
+  /creditwallettransactions/{id}:
+    get:
+      tags:
+        - Various Listing APIs
+      summary: Get CreditWalletTransaction
+      description: Get details of the credit wallet transaction
+      parameters:
+        - name: id
+          in: path
+          description: (Required) (This needs to be creditwallettransactions _id value)
+          required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /creditwallettransactions:
+    get:
+      tags:
+        - Various Listing APIs
+      summary: Fetch CreditWalletTransaction
+      description: Fetch credit wallet transactions based on various filters
+      parameters:
+        - name: lead_id
+          in: query
+          description: (Required) (This needs to be leads _id value)
+          required: true
+          schema:
+            type: string
+        - name: hash
+          in: query
+          description: (Minimum length is 1) (Maximum length is 128) (This needs to be creditwallettransactions hash value)
+          schema:
+            type: string
+        - name: operation
+          in: query
+          description: (This needs to be creditwallettransactions operation value) (This can only be one of cr,dr)
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: (This needs to be creditwallettransactions _id value)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: (Minimum is 1)
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: (Minimum is 1) (Maximum is 100)
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: (This can only be one of created_at,updated_at)
+          schema:
+            type: string
+        - name: sort_op
+          in: query
+          description: (This can only be one of ASC,DESC)
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /reviews/{id}:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Get Review
       description: Get details of the review
       parameters:
@@ -1091,7 +1322,7 @@ paths:
   /reviews:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Fetch Reviews
       description: Fetch reviews based on various filters
       parameters:
@@ -1167,7 +1398,7 @@ paths:
   /reviews-count:
     get:
       tags:
-        - Listing APIs
+        - Various Listing APIs
       summary: Get Review Count
       description: Get review count for the passed filters
       parameters:
