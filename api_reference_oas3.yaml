@@ -467,6 +467,7 @@ tags:
   - name: User APIs
   - name: Trigger APIs (Easiest way to start rewarding with nector)
   - name: Offer Reward APIs
+  - name: Cross Selling Offer Reward APIs
   - name: Review APIs
   - name: QnA APIs
   - name: Various Listing APIs
@@ -901,7 +902,7 @@ paths:
   /publicofferrewards:
     post:
       tags:
-        - Offer Reward APIs
+        - Cross Selling Offer Reward APIs
       summary: Reward Cross Selling Offer
       description: Reward a cross selling offer without using wallet points. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
       parameters:
@@ -938,7 +939,7 @@ paths:
   /publicofferredeems:
     post:
       tags:
-        - Offer Reward APIs
+        - Cross Selling Offer Reward APIs
       summary: Redeem Cross Selling Offer
       description: Redeem a cross selling offer using wallet points.
       parameters:
