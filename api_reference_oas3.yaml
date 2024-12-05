@@ -410,6 +410,131 @@ components:
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the qna)
         question: <string> (Required) (This needs to be the question of the user)
 
+    merchant_create_uploads:
+      title: merchant_create_uploads
+      required:
+        - parent_id
+        - parent_type
+      type: object
+      properties:
+        parent_id:
+          type: string
+          description: (Required) (This needs to be reviews or qnas _id value)
+        parent_type:
+          type: string
+          description: (Required) (This can only be one of reviews,qnas)
+        position:
+          type: number
+          description: (Minimum is 1) (This needs to position of the upload)
+      example:
+        parent_id: <string> (Required) (This needs to be reviews or qnas _id value)
+        parent_type: <string> (Required) (This can only be one of reviews,qnas)
+        position: 1
+
+    merchant_create_referralviaemailleads:
+      title: merchant_create_referralviaemailleads
+      required:
+        - referred_by_referral_code
+        - name
+      type: object
+      properties:
+        referred_by_referral_code:
+          type: string
+          description: (Required) (This needs to leads referral_code value of the customer who is referring)
+        name:
+          type: string
+          description: (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
+        metadetail:
+          properties:
+            email:
+              type: string
+              description: (Required) (This needs to be valid email)
+      example:
+        referred_by_referral_code: <string> (Required) (This needs to leads referral_code value of the customer who is referring)
+        name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
+        metadetail:
+          email: <string> (Required) (This needs to be valid email)
+
+    merchant_create_referralviamobileleads:
+      title: merchant_create_referralviamobileleads
+      required:
+        - referred_by_referral_code
+        - name
+      type: object
+      properties:
+        referred_by_referral_code:
+          type: string
+          description: (Required) (This needs to leads referral_code value of the customer who is referring)
+        name:
+          type: string
+          description: (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
+        metadetail:
+          properties:
+            mobile:
+              type: string
+              description: (Required) (Minimum length is 4) (Maximum length is 15)
+            country:
+              type: string
+              description: (Required) (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+      example:
+        referred_by_referral_code: <string> (Required) (This needs to leads referral_code value of the customer who is referring)
+        name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
+        metadetail:
+          mobile: <string> (Required) (Minimum length is 4) (Maximum length is 15)
+          country: <string> (Required) (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+
+    merchant_create_inviteviaemailleads:
+      title: merchant_create_inviteviaemailleads
+      required:
+        - referred_by_referral_code
+        - name
+      type: object
+      properties:
+        referred_by_referral_code:
+          type: string
+          description: (Required) (This needs to leads referral_code value of the customer who is referring)
+        name:
+          type: string
+          description: (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
+        metadetail:
+          properties:
+            email:
+              type: string
+              description: (Required) (This needs to be valid email)
+      example:
+        referred_by_referral_code: <string> (Required) (This needs to leads referral_code value of the customer who is referring)
+        name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
+        metadetail:
+          email: <string> (Required) (This needs to be valid email)
+
+    merchant_create_inviteviamobileleads:
+      title: merchant_create_inviteviamobileleads
+      required:
+        - referred_by_referral_code
+        - name
+      type: object
+      properties:
+        referred_by_referral_code:
+          type: string
+          description: (Required) (This needs to leads referral_code value of the customer who is referring)
+        name:
+          type: string
+          description: (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
+        metadetail:
+          properties:
+            mobile:
+              type: string
+              description: (Required) (Minimum length is 4) (Maximum length is 15)
+            country:
+              type: string
+              description: (Required) (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+      example:
+        referred_by_referral_code: <string> (Required) (This needs to leads referral_code value of the customer who is referring)
+        name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
+        metadetail:
+          mobile: <string> (Required) (Minimum length is 4) (Maximum length is 15)
+          country: <string> (Required) (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+
     subschema_metadetail:
       title: subschema_metadetail
       type: object
@@ -550,6 +675,8 @@ tags:
   - name: Cross Selling Offer Reward APIs
   - name: Review APIs
   - name: QnA APIs
+  - name: Referral APIs
+  - name: Misc APIs
   - name: Various Listing APIs
 
 paths:
@@ -593,10 +720,158 @@ paths:
           description: "200"
       security: []
 
+  /leads-referral-via-email:
+    post:
+      tags:
+        - Referral APIs
+      summary: Claim Referral Code via Email
+      description: This API is intended for situations where the referee has their friend's referral code. For example, an existing customer shares their referral code with friends, enabling them to sign up. This process also creates an account for the referee on the host platform (e.g., Shopify or WooCommerce).
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_referralviaemailleads"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /leads-referral-via-mobile:
+    post:
+      tags:
+        - Referral APIs
+      summary: Claim Referral Code via Mobile Number
+      description: This API is designed for scenarios where the referee has a friend's referral code, such as when an existing customer shares their code with friends. Using the code will create an account on the host platform (e.g., Shopify). This functionality is available exclusively for Shopify brands.
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_referralviamobileleads"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /leads-invite-via-email:
+    post:
+      tags:
+        - Referral APIs
+      summary: Invite Friends via Email
+      description: This API is tailored for situations where the referrer knows their friend's email address and wants to send them an invitation. For instance, an existing customer can enter their friend's email to invite them. This action will also create an account for the friend on the host platform (e.g., Shopify or WooCommerce).
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_inviteviaemailleads"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /leads-invite-via-mobile:
+    post:
+      tags:
+        - Referral APIs
+      summary: Invite Friends via Mobile Number
+      description: This API is designed for scenarios where the referrer knows their friend's mobile number and wants to send them an invitation. For example, an existing customer can enter their friend's mobile number to invite them. This action will also create an account for the friend on the host platform (e.g., Shopify). This functionality is available exclusively for Shopify brands.
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_inviteviamobileleads"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /referrals/{id}:
     get:
       tags:
-        - Various Listing APIs
+        - Referral APIs
       summary: Get Referral
       description: Get details of the referral
       parameters:
@@ -633,7 +908,7 @@ paths:
   /referrals:
     get:
       tags:
-        - Various Listing APIs
+        - Referral APIs
       summary: Fetch Referrals
       description: Fetch referrals based on various filters
       parameters:
@@ -1853,6 +2128,43 @@ paths:
           required: true
           schema:
             type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /uploads:
+    post:
+      tags:
+        - Misc APIs
+      summary: Create Upload
+      description: Upload a file against reviews or qnas on behalf of the user.
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_uploads"
+        required: true
 
       responses:
         "200":
