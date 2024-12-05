@@ -70,14 +70,6 @@ components:
         customer_id:
           type: string
           description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
-        referral_code:
-          type: string
-          description: (Minimum length is 1) (Maximum length is 128) (If user exists it will be ignored)
-        name:
-          type: string
-          description: (This is name of this user)
-        metadetail:
-          $ref: "#/components/schemas/subschema_metadetail"
         trace:
           $ref: "#/components/schemas/subschema_trace"
 
@@ -85,13 +77,6 @@ components:
         trigger_id: <uuid> (Required) (This needs to be triggers _id value)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
-        referral_code: <string> (Minimum length is 1) (Maximum length is 128) (If user does not exists it will get created with passed referral_code value else a random 8 digit referral_code will be generated for this user)
-        name: <string> (This is name of this user)
-        metadetail:
-          email: <string> (One of mobile or email is required) (This needs to be valid email)
-          mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
-          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
-          dob: <string> (This needs to be ISO format date only)
         trace:
           via_api_for_wallet:
             title: <string> (Any string that needs to be passed as a title) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
@@ -535,23 +520,6 @@ components:
           mobile: <string> (Required) (Minimum length is 4) (Maximum length is 15)
           country: <string> (Required) (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
 
-    subschema_metadetail:
-      title: subschema_metadetail
-      type: object
-      properties:
-        email:
-          type: string
-          description: (One of mobile or email is required) (This needs to be valid email)
-        mobile:
-          type: string
-          description: (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
-        country:
-          type: string
-          description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
-        dob:
-          type: string
-          description: (This needs to be ISO format date only)
-
     subschema_trace:
       title: subschema_trace
       type: object
@@ -667,8 +635,8 @@ components:
       scheme: basic
 
 tags:
-  - name: User APIs
   - name: Trigger APIs (Easiest way to start rewarding with nector)
+  - name: User APIs
   - name: Wallet Reward APIs
   - name: Credit Wallet Reward APIs
   - name: Offer Reward APIs
@@ -683,12 +651,9 @@ paths:
   /activities:
     post:
       tags:
-        - Trigger Execution APIs
+        - Trigger APIs (Easiest way to start rewarding with nector)
       summary: Reward Using Trigger
-      description: |-
-        - One single API for all your rewarding needs.
-        - Triggers can be created from the dashboard
-        - Contact us at support@nector.io for help
+      description: This API is used to reward users based on the trigger. The trigger can be any of the following wallet reward, offer reward, email, event, or webhook. The trigger can be set up in the Nector dashboard.
       parameters:
         - name: x-source
           in: header
