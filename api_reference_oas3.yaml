@@ -184,7 +184,7 @@ components:
       properties:
         customer_id:
           type: string
-          description: (Required) (Make sure this is not predictable value. ex any uuid value) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
+          description: (Required) (Make sure this is not predictable value. ex any uuid value) (Minimum length is 8) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
         name:
           type: string
           description: (Required) (This is full name of the user ex. John Wick) (Maximum length is 200)
@@ -328,7 +328,7 @@ components:
           description: (This needs to be orders _id value) (If this is passed then the review will be attched against an order and the review will be marked as verified)
         reference_product_source:
           type: string
-          description: (Required) (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+          description: (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
         reference_product_id:
           type: string
           description: (Required) (This needs to be products reference_product_id value)
@@ -347,7 +347,7 @@ components:
           mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
           country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
         order_id: <uuid> (This needs to be orders _id value) (If this is passed then the review will be attched against an order and the review will be marked as verified)
-        reference_product_source: <string> (Required) (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+        reference_product_source: <string> (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
         reference_product_id: <string> (Required) (This needs to be products reference_product_id value)
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the review)
         rating: 4
@@ -375,7 +375,7 @@ components:
               description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
         reference_product_source:
           type: string
-          description: (Required) (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+          description: (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
         reference_product_id:
           type: string
           description: (Required) (This needs to be products reference_product_id value)
@@ -390,7 +390,7 @@ components:
           email: <string> (One of mobile or email is required) (One of mobile or email is required) (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
           country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
-        reference_product_source: <string> (Required) (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+        reference_product_source: <string> (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
         reference_product_id: <string> (Required) (This needs to be products reference_product_id value)
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the qna)
         question: <string> (Required) (This needs to be the question of the user)
@@ -1815,7 +1815,7 @@ paths:
       parameters:
         - name: reference_product_source
           in: query
-          description: (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
           schema:
             type: string
         - name: reference_product_id
@@ -1928,7 +1928,7 @@ paths:
       parameters:
         - name: reference_product_source
           in: query
-          description: (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
           schema:
             type: string
         - name: reference_product_id
@@ -2005,7 +2005,7 @@ paths:
       parameters:
         - name: reference_product_source
           in: query
-          description: (This needs to be products reference_product_source value) (This can only be one of external,shopify,woocommerce)
+          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
           schema:
             type: string
         - name: reference_product_id
