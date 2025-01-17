@@ -1452,17 +1452,12 @@ paths:
             type: string
         - name: email
           in: query
-          description: (This needs to be leads email value) (If this value is passed, it will be given second preference while searching user)
+          description: (This needs to be leads email value) (If this value is passed, it will be given third preference while searching user)
           schema:
             type: string
         - name: mobile
           in: query
-          description: (This needs to be leads mobile value) (If this value is passed, it will be given second preference while searching user)
-          schema:
-            type: string
-        - name: country
-          in: query
-          description: (This needs to be leads country value) (Required if the mobile is passed)
+          description: (This needs to be leads mobile value) (If this value is passed, it will be given fourth preference while searching user)
           schema:
             type: string
         - name: id
