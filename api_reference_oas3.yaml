@@ -846,6 +846,16 @@ paths:
           required: true
           schema:
             type: string
+        - name: referred_by_lead_id
+          in: query
+          description: (This needs to be leads _id value) (one of referred_to_lead_id or referred_by_lead_id is required)
+          schema:
+            type: string
+        - name: referred_to_lead_id
+          in: query
+          description: (This needs to be leads _id value) (one of referred_to_lead_id or referred_by_lead_id is required)
+          schema:
+            type: string
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
@@ -880,7 +890,6 @@ paths:
         - name: referred_by_lead_id
           in: query
           description: (This needs to be leads _id value) (one of referred_to_lead_id or referred_by_lead_id is required)
-          required: true
           schema:
             type: string
         - name: referred_to_lead_id
@@ -1021,6 +1030,12 @@ paths:
         - name: id
           in: path
           description: (Required) (This can be any valid uuidv4 value or coupons _id value)
+          required: true
+          schema:
+            type: string
+        - name: lead_id
+          in: query
+          description: (Required) (This needs to be leads _id value)
           required: true
           schema:
             type: string
@@ -1199,6 +1214,12 @@ paths:
         - name: id
           in: path
           description: (Required) (This can be any valid uuidv4 value or publiccoupons _id value)
+          required: true
+          schema:
+            type: string
+        - name: lead_id
+          in: query
+          description: (Required) (This needs to be leads _id value)
           required: true
           schema:
             type: string
@@ -1611,6 +1632,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: lead_id
+          in: query
+          description: (Required) (This needs to be leads _id value)
+          required: true
+          schema:
+            type: string
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
@@ -1753,6 +1780,12 @@ paths:
         - name: id
           in: path
           description: (Required) (This needs to be creditwallettransaction _id value)
+          required: true
+          schema:
+            type: string
+        - name: lead_id
+          in: query
+          description: (Required) (This needs to be leads _id value)
           required: true
           schema:
             type: string
@@ -2072,7 +2105,7 @@ paths:
           description: "200"
       security: []
 
-  /qna/{id}:
+  /qnas/{id}:
     get:
       tags:
         - QnA APIs
@@ -2083,6 +2116,47 @@ paths:
           in: path
           description: (Required) (This needs to be reveiews _id value)
           required: true
+          schema:
+            type: string
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /qnas-count:
+    get:
+      tags:
+        - QnA APIs
+      summary: Get QnA Count
+      description: Get qna count for the passed filters
+      parameters:
+        - name: reference_product_source
+          in: query
+          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
+          schema:
+            type: string
+        - name: reference_product_id
+          in: query
+          description: (This needs to be products reference_product_id value)
           schema:
             type: string
         - name: x-source
