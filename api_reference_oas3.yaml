@@ -1370,6 +1370,78 @@ paths:
           description: "200"
       security: []
 
+  /aggreegateddetails:
+    get:
+      tags:
+        - Various Listing APIs
+      summary: Fetch Aggreegated Details
+      description: Fetch the aggreegateddetails of various configs based on tier
+      parameters:
+        - name: tier
+          in: query
+          description: (This needs to be lead's tier value or null)
+          schema:
+            type: number
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
+  /aggreegatedoffers:
+    get:
+      tags:
+        - Various Listing APIs
+      summary: Fetch Aggreegated Offers
+      description: Fetches the aggreegatedoffers based on tier
+      parameters:
+        - name: tier
+          in: query
+          description: (This needs to be lead's tier value or null)
+          schema:
+            type: number
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: "200"
+      security: []
+
   /leads:
     post:
       tags:
