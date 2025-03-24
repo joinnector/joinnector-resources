@@ -1381,7 +1381,7 @@ paths:
           in: query
           description: (This needs to be lead's tier value or null)
           schema:
-            type: number
+            type: string
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
@@ -1417,7 +1417,7 @@ paths:
           in: query
           description: (This needs to be lead's tier value or null)
           schema:
-            type: number
+            type: string
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
