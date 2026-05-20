@@ -12,6 +12,7 @@ info:
         - Nector enforces strict param check. (Pass string if it requires string and so on)
         - We only support UUIDV4
         - Contact us at support@nector.io for more information
+        - For storefront (read API key) authentication using lead tokens and digests, see https://nector.readme.io/docs/authentication
 
     Get started by creating an account on https://merchant.nector.io
   contact:
@@ -663,7 +664,7 @@ paths:
       tags:
         - Trigger APIs (Easiest way to start rewarding with nector)
       summary: Reward Using Trigger
-      description: This API is used to reward users based on the trigger. The trigger can be any of the following wallet reward, offer reward, email, event, or webhook. The trigger can be set up in the Nector dashboard.
+      description: "This API is used to reward users based on the trigger. The trigger can be any of the following wallet reward, offer reward, email, event, or webhook. The trigger can be set up in the Nector dashboard. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: x-source
           in: header
@@ -681,6 +682,11 @@ paths:
           in: header
           description: (Required) (This needs to be your workspaceid)
           required: true
+          schema:
+            type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
           schema:
             type: string
       requestBody:
@@ -998,7 +1004,7 @@ paths:
       tags:
         - Offer Reward APIs
       summary: Redeem Offer
-      description: Redeem a offer using wallet points.
+      description: "Redeem a offer using wallet points. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: x-source
           in: header
@@ -1018,6 +1024,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -1035,7 +1046,7 @@ paths:
       tags:
         - Offer Reward APIs
       summary: Get Coupon
-      description: Get details of the coupon
+      description: "Get details of the coupon. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: id
           in: path
@@ -1067,6 +1078,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
@@ -1078,7 +1094,7 @@ paths:
       tags:
         - Offer Reward APIs
       summary: Fetch Coupons
-      description: Fetch coupons based on various filters
+      description: "Fetch coupons based on various filters. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: lead_id
           in: query
@@ -1134,6 +1150,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
@@ -1182,7 +1203,7 @@ paths:
       tags:
         - Cross Selling Offer Reward APIs
       summary: Redeem Cross Selling Offer
-      description: Redeem a cross selling offer using wallet points.
+      description: "Redeem a cross selling offer using wallet points. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: x-source
           in: header
@@ -1202,6 +1223,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -1219,7 +1245,7 @@ paths:
       tags:
         - Cross Selling Offer Reward APIs
       summary: Get Cross Selling Coupon
-      description: Get details of the cross selling coupon
+      description: "Get details of the cross selling coupon. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: id
           in: path
@@ -1251,6 +1277,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
@@ -1262,7 +1293,7 @@ paths:
       tags:
         - Cross Selling Offer Reward APIs
       summary: Fetch Cross Selling Coupons
-      description: Fetch cross selling coupons based on various filters
+      description: "Fetch cross selling coupons based on various filters. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: lead_id
           in: query
@@ -1316,6 +1347,11 @@ paths:
           in: header
           description: (Required) (This needs to be your workspaceid)
           required: true
+          schema:
+            type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
           schema:
             type: string
 
@@ -1494,7 +1530,7 @@ paths:
       tags:
         - User APIs
       summary: Update User
-      description: Update details of the user, it will update properties of the user, if the properties already exists it will not be updated
+      description: "Update details of the user, it will update properties of the user, if the properties already exists it will not be updated. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: customer_id
           in: query
@@ -1525,6 +1561,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -1541,7 +1582,7 @@ paths:
       tags:
         - User APIs
       summary: Get User
-      description: Get details of the user
+      description: "Get details of the user. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: customer_id
           in: query
@@ -1585,6 +1626,21 @@ paths:
           in: header
           description: (Required) (This needs to be your workspaceid)
           required: true
+          schema:
+            type: string
+        - name: x-timestamp
+          in: header
+          description: (Required when sending x-leaddigest) (Unix timestamp in seconds — must match the timestamp used to compute the x-leaddigest; valid within ±60 minutes of server time when digest is present)
+          schema:
+            type: number
+        - name: x-leaddigest
+          in: header
+          description: (Required when using a Storefront read API key without a lead token) (HMAC-SHA256 of "customer_id:timestamp" signed with your API signing secret, hex-encoded — a lead_token is returned in the response — Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
           schema:
             type: string
 
@@ -1634,7 +1690,7 @@ paths:
       tags:
         - Wallet Reward APIs
       summary: Fetch Wallet Transactions
-      description: Fetch wallet transactions based on various filters
+      description: "Fetch wallet transactions based on various filters. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: lead_id
           in: query
@@ -1695,6 +1751,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
@@ -1706,7 +1767,7 @@ paths:
       tags:
         - Wallet Reward APIs
       summary: Get Wallet Transaction
-      description: Get details of the wallet transaction
+      description: "Get details of the wallet transaction. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: id
           in: path
@@ -1736,6 +1797,11 @@ paths:
           in: header
           description: (Required) (This needs to be your workspaceid)
           required: true
+          schema:
+            type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
           schema:
             type: string
 
@@ -1785,7 +1851,7 @@ paths:
       tags:
         - Credit Wallet Reward APIs
       summary: Fetch Credit Wallet Transaction (Limited Access)
-      description: Fetch credit wallet transactions based on various filters
+      description: "Fetch credit wallet transactions based on various filters. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: lead_id
           in: query
@@ -1846,6 +1912,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
@@ -1857,7 +1928,7 @@ paths:
       tags:
         - Credit Wallet Reward APIs
       summary: Get Credit Wallet Transaction (Limited Access)
-      description: Get details of the credit wallet transaction
+      description: "Get details of the credit wallet transaction. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment."
       parameters:
         - name: id
           in: path
@@ -1887,6 +1958,11 @@ paths:
           in: header
           description: (Required) (This needs to be your workspaceid)
           required: true
+          schema:
+            type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a Storefront read API key) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
           schema:
             type: string
 
