@@ -13,17 +13,19 @@ info:
         - We only support UUIDV4
         - Contact us at support@nector.io for more information
 
-    API keys
+    API keys and authentication
 
-        - Read only api key: safe to use from your frontend (web or mobile). Enough for every GET API and for Redeem Offer, Redeem Cross Selling Offer, Checkout Redemption APIs (with x-leadtoken), Create Review, Create QnA, Create Upload and the Referral APIs
-        - Full access api key: use only from your backend. Required for Create User, Reward Using Trigger, Create Wallet Transaction, Create Credit Wallet Transaction, Reward Offer and Reward Cross Selling Offer
-        - Generate api keys from the dashboard (Settings > API Keys)
+        - Every request carries x-apikey, x-workspaceid and x-source
+        - Write api key: use only from your backend, never in a browser or app. Required for Create User, Create Wallet Transaction, Create Credit Wallet Transaction, Reward Offer and Reward Cross Selling Offer. No customer authentication is needed since your backend is trusted
+        - Read only api key with purpose server: for your backend, all GET APIs and customer facing writes (Reward Using Trigger, Redeem Offer, Checkout Redemption, Create Review and so on). No customer authentication is needed
+        - Read only api key with purpose storefront: safe to embed in your web or mobile app. Customer scoped APIs additionally need the customer to be authenticated with a lead token in the x-leadtoken header, so that a visitor cannot act on another customer's account. Get User accepts x-leaddigest (computed on your server) and returns the lead_token, valid for 1 hour
+        - Generate api keys and the signing secret from the dashboard (Settings > API Keys). Full flow with samples at https://nector.readme.io/docs/authentication
 
     Recommended integration flow
 
         1. Fetch Aggreegated Details once on app load to get the program settings (coin name, earning ratio, tiers, memberships and so on)
         2. Create User (from your backend) when a customer signs up, then Get User to fetch their wallet balance, tier and membership
-        3. Fetch Triggers to render the earning rules and call Reward Using Trigger (from your backend) when the customer completes an action
+        3. Fetch Triggers to render the earning rules and call Reward Using Trigger when the customer completes an action (from your backend, or from the storefront with a lead token)
         4. Fetch Aggreegated Offers to render the redemption rules and call Redeem Offer when the customer spends coins, then Fetch Coupons to show the coupons they own
 
     Responses
@@ -303,9 +305,10 @@ components:
           description: (Required) (Minimum is 1) (This needs to be the coin amount)
         hash:
           type: string
-          description: (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector, ex. your order id, and can later be used to filter transactions)
+          description: (Maximum length is 64) (Your own reference for this transaction, ex. your order id) (Acts as an idempotency key, if a transaction with the same hash already exists nothing is created and the existing transaction is returned with success false) (Can later be used to filter transactions)
         operation:
           type: string
+          enum: [cr, dr]
           description: (Required) (This needs to be wallettransaction operation value) (This can only be one of cr,dr) (cr credits coins to the wallet, dr debits coins from the wallet)
       example:
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
@@ -314,7 +317,7 @@ components:
         description: <string> (This needs to be wallettransaction description)
         amount: 12
         hash: <string> (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector)
-        operation: <string> (Required) (This needs to be wallettransaction operation value) (This can only be one of cr,dr) (cr credits coins to the wallet, dr debits coins from the wallet)
+        operation: cr
 
     merchant_create_creditwallettransactions:
       title: merchant_create_creditwallettransactions
@@ -341,9 +344,10 @@ components:
           description: (Required) (This needs to be the credit amount, 1 credit = $1)
         hash:
           type: string
-          description: (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector, ex. your order id, and can later be used to filter transactions)
+          description: (Maximum length is 64) (Your own reference for this transaction, ex. your order id) (Acts as an idempotency key, if a transaction with the same hash already exists nothing is created and the existing transaction is returned with success false) (Can later be used to filter transactions)
         operation:
           type: string
+          enum: [cr, dr]
           description: (Required) (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr) (cr credits the credit wallet, dr debits the credit wallet)
       example:
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
@@ -352,7 +356,7 @@ components:
         description: <string> (This needs to be creditwallettransaction description)
         amount: 12
         hash: <string> (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector)
-        operation: <string> (Required) (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr) (cr credits the credit wallet, dr debits the credit wallet)
+        operation: cr
 
     merchant_create_reviews:
       title: merchant_create_reviews
@@ -383,7 +387,8 @@ components:
           description: (Minimum length is 1) (Maximum length is 128) (This needs to be the order id on your platform, ex. shopify order id) (Alternative to order_id, if this is passed then the review will be attached against the matching order and the review will be marked as verified)
         reference_product_source:
           type: string
-          description: (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
+          enum: [custom_website, shopify, woocommerce, magento]
+          description: (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce,magento)
         reference_product_id:
           type: string
           description: (Required) (This needs to be products reference_product_id value)
@@ -396,6 +401,13 @@ components:
         description:
           type: string
           description: (Required) (This needs to be description of the review)
+        image_links:
+          type: array
+          description: (Maximum 5 items) (Public image URLs to attach to the review, each must be a valid URL) (Alternative to Create Upload when the images are already hosted)
+          maxItems: 5
+          items:
+            type: string
+            format: uri
       example:
         metadetail:
           email: <string> (One of mobile or email is required) (This needs to be valid email)
@@ -403,11 +415,14 @@ components:
           country: <string> (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
         order_id: <uuid> (This needs to be orders _id value) (If this is passed then the review will be attached against an order and the review will be marked as verified)
         reference_order_id: <string> (Minimum length is 1) (Maximum length is 128) (This needs to be the order id on your platform, ex. shopify order id) (Alternative to order_id)
-        reference_product_source: <string> (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
+        reference_product_source: shopify
         reference_product_id: <string> (Required) (This needs to be products reference_product_id value)
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the review)
         rating: 4
         description: <string> (Required) (This needs to be description of the review)
+        image_links:
+          - https://example.com/image1.jpg
+          - https://example.com/image2.jpg
 
     merchant_create_qnas:
       title: merchant_create_qnas
@@ -431,7 +446,8 @@ components:
               description: (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
         reference_product_source:
           type: string
-          description: (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
+          enum: [custom_website, shopify, woocommerce, magento]
+          description: (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce,magento)
         reference_product_id:
           type: string
           description: (Required) (This needs to be products reference_product_id value)
@@ -446,7 +462,7 @@ components:
           email: <string> (One of mobile or email is required) (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
           country: <string> (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
-        reference_product_source: <string> (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
+        reference_product_source: shopify
         reference_product_id: <string> (Required) (This needs to be products reference_product_id value)
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the qna)
         question: <string> (Required) (This needs to be the question of the user)
@@ -468,6 +484,7 @@ components:
           description: (Required) (This needs to be reviews or qnas _id value)
         parent_type:
           type: string
+          enum: [reviews, qnas]
           description: (Required) (This can only be one of reviews,qnas)
         position:
           type: number
@@ -475,7 +492,7 @@ components:
       example:
         file: <binary> (Required) (The image or video file)
         parent_id: <string> (Required) (This needs to be reviews or qnas _id value)
-        parent_type: <string> (Required) (This can only be one of reviews,qnas)
+        parent_type: reviews
         position: 1
 
     merchant_create_referralviaemailleads:
@@ -597,6 +614,7 @@ components:
           description: (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
         action:
           type: string
+          enum: [list, perform, revert]
           description: (Required) (This can only be one of list,perform,revert) (list returns the discount the customer can get for this cart, perform generates the discount coupon, revert cancels the coupon generated earlier)
         amount:
           type: number
@@ -604,7 +622,7 @@ components:
       example:
         lead_id: <uuid> (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
-        action: <string> (Required) (This can only be one of list,perform,revert)
+        action: list
         amount: 1500
 
     merchant_create_checkoutpageactions:
@@ -622,6 +640,7 @@ components:
           description: (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
         action:
           type: string
+          enum: [list, perform, revert]
           description: (Required) (This can only be one of list,perform,revert) (list returns the maximum discount and the step size the customer can redeem for this cart, perform generates the discount coupon for the chosen step, revert cancels the coupon generated earlier)
         amount:
           type: number
@@ -636,42 +655,22 @@ components:
             type: object
             required:
               - reference_product_id
-              - reference_product_source
-              - quantity
-              - price
-              - discount_amount
               - total_amount
             properties:
               reference_product_id:
                 type: string
                 description: (Required) (This needs to be the product id on your platform, ex. shopify product id)
-              reference_product_source:
-                type: string
-                description: (Required) (This can only be one of custom_website,shopify,woocommerce)
-              quantity:
-                type: number
-                description: (Required) (Minimum is 0)
-              price:
-                type: number
-                description: (Required) (Minimum is 0) (Unit price of the product)
-              discount_amount:
-                type: number
-                description: (Required) (Minimum is 0) (Discount already applied on this line)
               total_amount:
                 type: number
-                description: (Required) (Minimum is 0) (Line total after discount, this is the amount used for the applicable cart calculation)
+                description: (Required) (Minimum is 0) (Line total after any discount, this is the amount used for the applicable cart calculation)
       example:
         lead_id: <uuid> (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
-        action: <string> (Required) (This can only be one of list,perform,revert)
+        action: list
         amount: 1500
         step: 3
         line_items:
           - reference_product_id: <string> (Required) (This needs to be the product id on your platform)
-            reference_product_source: <string> (Required) (This can only be one of custom_website,shopify,woocommerce)
-            quantity: 1
-            price: 1500
-            discount_amount: 0
             total_amount: 1500
 
     subschema_trace:
@@ -823,7 +822,7 @@ paths:
       tags:
         - Trigger APIs (Easiest way to start rewarding with nector)
       summary: Reward Using Trigger
-      description: This API is used to reward users based on the trigger. The trigger can be any of the following wallet reward, offer reward, email, event, or webhook. The trigger can be set up in the Nector dashboard and its _id can be fetched using Fetch Triggers. The earning rule of the trigger (once, once in a period, on activity count reached and so on) is evaluated on our side, so it is safe to call this API on every occurrence of the action. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      description: This API is used to reward users based on the trigger. The trigger can be any of the following wallet reward, offer reward, email, event, or webhook. The trigger can be set up in the Nector dashboard and its _id can be fetched using Fetch Triggers. The earning rule of the trigger (once, once in a period, on activity count reached and so on) is evaluated on our side, so it is safe to call this API on every occurrence of the action. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: x-source
           in: header
@@ -831,6 +830,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -843,6 +843,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -853,6 +858,59 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  activity:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    trigger_id: <uuid>
+                    event: <string>
+                    hash: <string>
+                    is_processed: <boolean>
+                    state: <string>
+                    scheduled_at: <string> (ISO date, set when the trigger rewards after a delay)
+                    created_at: <string> (ISO date)
+                  lead:
+                    _id: <uuid>
+                    customer_id: <string> (Your mapping id)
+                    referral_code: <string>
+                    name: <string>
+                    role: <string> (One of primary,secondary)
+                    email: <string> (Masked, ex. jo***@example.com)
+                    mobile: <string> (Masked)
+                    country: <string>
+                    dob: <string> (ISO date or null)
+                    gender: <string>
+                    tags: <array>
+                    accept_email: <boolean>
+                    accept_mobile: <boolean>
+                    wallet_id: <uuid>
+                    creditwallet_id: <uuid>
+                    wallet:
+                      _id: <uuid>
+                      available: <number> (Current coin balance)
+                      tier: <string> (null when the customer has no tier)
+                      membership: <string> (null when the customer has no membership)
+                      transaction_amount: <number> (Lifetime purchase amount)
+                      transaction_count: <number> (Lifetime order count)
+                      total_saving: <number>
+                      total_referral: <number>
+                      internal_tags: <array>
+                    creditwallet:
+                      _id: <uuid>
+                      available_credit: <number> (Current credit balance)
+                    created_at: <string> (ISO date)
+                    updated_at: <string> (ISO date)
+                  wallet_reward:
+                    wallettransaction: <object> (The wallet transaction created, present only for wallet reward triggers)
+                  offer_reward:
+                    coupon: <object> (The coupon generated, present only for offer reward triggers)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -881,6 +939,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -903,6 +962,16 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  coupon: <object> (Reward coupon given to the referred customer, when the referral action rewards an offer)
+                  wallettransaction: <object> (Reward transaction given to the referred customer, when the referral action rewards coins)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -931,6 +1000,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -953,6 +1023,16 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  coupon: <object> (Reward coupon given to the referred customer, when the referral action rewards an offer)
+                  wallettransaction: <object> (Reward transaction given to the referred customer, when the referral action rewards coins)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -981,6 +1061,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1003,6 +1084,14 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1031,6 +1120,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1053,6 +1143,14 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1081,22 +1179,26 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: referred_by_lead_id
           in: query
           description: (This needs to be leads _id value) (one of referred_to_lead_id or referred_by_lead_id is required)
           schema:
             type: string
+            format: uuid
         - name: referred_to_lead_id
           in: query
           description: (This needs to be leads _id value) (one of referred_to_lead_id or referred_by_lead_id is required)
           schema:
             type: string
+            format: uuid
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1113,6 +1215,25 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  item:
+                    _id: <uuid>
+                    referred_by_lead_id: <uuid> (The customer who shared the code)
+                    referred_to_lead_id: <uuid> (The customer who joined)
+                    referred_by_name: <string>
+                    referred_to_name: <string>
+                    referral_mode: <string>
+                    status: <string> (One of pending,completed) (completed once the referred customer finishes the qualifying action, ex. first order)
+                    coupon_id: <uuid> (Reward coupon given to the referrer, when the referral reward is an offer)
+                    wallettransaction_id: <uuid> (Reward transaction given to the referrer, when the referral reward is coins)
+                    order_id: <uuid> (The qualifying order, when applicable)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1133,49 +1254,58 @@ paths:
       tags:
         - Referral APIs
       summary: Fetch Referrals
-      description: Fetch referrals based on various filters
+      description: Fetch the referrals of a customer, either the ones they made (referred_by_lead_id) or the one they joined through (referred_to_lead_id), plus a per day count by status in stats.
       parameters:
         - name: referred_by_lead_id
           in: query
           description: (This needs to be leads _id value) (one of referred_to_lead_id or referred_by_lead_id is required)
           schema:
             type: string
+            format: uuid
         - name: referred_to_lead_id
           in: query
           description: (This needs to be leads _id value) (one of referred_to_lead_id or referred_by_lead_id is required)
           schema:
             type: string
+            format: uuid
         - name: id
           in: query
           description: (This needs to be referrals _id value)
           schema:
             type: string
+            format: uuid
         - name: page
           in: query
           description: (Minimum is 1)
           schema:
             type: number
+            minimum: 1
         - name: limit
           in: query
           description: (Minimum is 1) (Maximum is 100)
           schema:
             type: number
+            minimum: 1
+            maximum: 100
         - name: sort
           in: query
           description: (This can only be one of created_at,updated_at)
           schema:
             type: string
+            enum: [created_at, updated_at]
         - name: sort_op
           in: query
           description: (This can only be one of ASC,DESC)
           schema:
             type: string
+            enum: [ASC, DESC]
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1192,6 +1322,30 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  items:
+                    - _id: <uuid>
+                      referred_by_lead_id: <uuid> (The customer who shared the code)
+                      referred_to_lead_id: <uuid> (The customer who joined)
+                      referred_by_name: <string>
+                      referred_to_name: <string>
+                      referral_mode: <string>
+                      status: <string> (One of pending,completed) (completed once the referred customer finishes the qualifying action, ex. first order)
+                      coupon_id: <uuid> (Reward coupon given to the referrer, when the referral reward is an offer)
+                      wallettransaction_id: <uuid> (Reward transaction given to the referrer, when the referral reward is coins)
+                      order_id: <uuid> (The qualifying order, when applicable)
+                      created_at: <string> (ISO date)
+                  count: <number> (Total matching referrals)
+                  stats:
+                    - status: <string> (One of pending,completed)
+                      date: <string> (ISO date, start of the day)
+                      count: <number> (Referrals with this status created on this day)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1220,6 +1374,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1242,6 +1397,34 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  item: <object> (The offer that was rewarded)
+                  coupon:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    offer_id: <uuid>
+                    activity_id: <uuid> (Set when generated by a trigger)
+                    trigger_id: <uuid> (Set when generated by a trigger)
+                    name: <string>
+                    description: <string>
+                    type: <string>
+                    value: <string> (The coupon or discount code to show to the customer)
+                    fiat_class: <string> (One of amount,percent)
+                    fiat_value: <number>
+                    fiat_target: <string>
+                    minimumcart_amount: <number> (null when there is no minimum cart)
+                    used: <number> (Times the code has been used)
+                    status: <string> (One of issued,redeemed,marked_for_deletion,unavailable)
+                    redirect_link: <string> (Link that applies the code, when configured)
+                    expire: <string> (ISO date, null when it never expires)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1262,7 +1445,7 @@ paths:
       tags:
         - Offer Reward or Redeem APIs
       summary: Redeem Offer
-      description: Redeem an offer using wallet points, i.e. the coin_amount of the offer rule is deducted from the wallet and a coupon is generated. Use the offer _id from businessoffers of Fetch Aggreegated Offers. Only offers in published status can be redeemed, listed offers are display only. Read only api key is sufficient.
+      description: Redeem an offer using wallet points, i.e. the coin_amount of the offer rule is deducted from the wallet and a coupon is generated. Use the offer _id from businessoffers of Fetch Aggreegated Offers. Only offers in published status can be redeemed, listed offers are display only. Read only api key is sufficient. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: x-source
           in: header
@@ -1270,6 +1453,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1282,6 +1466,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -1292,6 +1481,34 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  item: <object> (The offer that was redeemed)
+                  coupon:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    offer_id: <uuid>
+                    activity_id: <uuid> (Set when generated by a trigger)
+                    trigger_id: <uuid> (Set when generated by a trigger)
+                    name: <string>
+                    description: <string>
+                    type: <string>
+                    value: <string> (The coupon or discount code to show to the customer)
+                    fiat_class: <string> (One of amount,percent)
+                    fiat_value: <number>
+                    fiat_target: <string>
+                    minimumcart_amount: <number> (null when there is no minimum cart)
+                    used: <number> (Times the code has been used)
+                    status: <string> (One of issued,redeemed,marked_for_deletion,unavailable)
+                    redirect_link: <string> (Link that applies the code, when configured)
+                    expire: <string> (ISO date, null when it never expires)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1312,7 +1529,7 @@ paths:
       tags:
         - Offer Reward or Redeem APIs
       summary: Get Coupon
-      description: Get details of the coupon
+      description: Get a single coupon of the customer by its _id, including the code (value), status, fiat_class, fiat_value, expiry and the offer it was generated from. lead_id is required so a customer can only read their own coupons. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: id
           in: path
@@ -1320,18 +1537,21 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: lead_id
           in: query
           description: (Required) (This needs to be leads _id value)
           required: true
           schema:
             type: string
+            format: uuid
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1344,10 +1564,41 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  item:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    offer_id: <uuid>
+                    activity_id: <uuid> (Set when generated by a trigger)
+                    trigger_id: <uuid> (Set when generated by a trigger)
+                    name: <string>
+                    description: <string>
+                    type: <string>
+                    value: <string> (The coupon or discount code to show to the customer)
+                    fiat_class: <string> (One of amount,percent)
+                    fiat_value: <number>
+                    fiat_target: <string>
+                    minimumcart_amount: <number> (null when there is no minimum cart)
+                    used: <number> (Times the code has been used)
+                    status: <string> (One of issued,redeemed,marked_for_deletion,unavailable)
+                    redirect_link: <string> (Link that applies the code, when configured)
+                    expire: <string> (ISO date, null when it never expires)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1368,7 +1619,7 @@ paths:
       tags:
         - Offer Reward or Redeem APIs
       summary: Fetch Coupons
-      description: Fetch the coupons owned by a customer, i.e. the result of Reward Offer, Redeem Offer or an offer reward trigger. Each coupon carries the code, status, expiry and the offer it was generated from.
+      description: Fetch the coupons owned by a customer, i.e. the result of Reward Offer, Redeem Offer or an offer reward trigger. Each coupon carries the code, status, expiry and the offer it was generated from. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: lead_id
           in: query
@@ -1376,42 +1627,51 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: offer_id
           in: query
           description: (This needs to be coupons offer_id value) (Filter coupons generated from a specific offer)
           schema:
             type: string
+            format: uuid
         - name: id
           in: query
           description: (This needs to be coupons _id value)
           schema:
             type: string
+            format: uuid
         - name: page
           in: query
           description: (Minimum is 1)
           schema:
             type: number
+            minimum: 1
         - name: limit
           in: query
           description: (Minimum is 1) (Maximum is 100)
           schema:
             type: number
+            minimum: 1
+            maximum: 100
         - name: sort
           in: query
           description: (This can only be one of created_at,updated_at)
           schema:
             type: string
+            enum: [created_at, updated_at]
         - name: sort_op
           in: query
           description: (This can only be one of ASC,DESC)
           schema:
             type: string
+            enum: [ASC, DESC]
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1424,10 +1684,42 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  items:
+                    - _id: <uuid>
+                      lead_id: <uuid>
+                      offer_id: <uuid>
+                      activity_id: <uuid> (Set when generated by a trigger)
+                      trigger_id: <uuid> (Set when generated by a trigger)
+                      name: <string>
+                      description: <string>
+                      type: <string>
+                      value: <string> (The coupon or discount code to show to the customer)
+                      fiat_class: <string> (One of amount,percent)
+                      fiat_value: <number>
+                      fiat_target: <string>
+                      minimumcart_amount: <number> (null when there is no minimum cart)
+                      used: <number> (Times the code has been used)
+                      status: <string> (One of issued,redeemed,marked_for_deletion,unavailable)
+                      redirect_link: <string> (Link that applies the code, when configured)
+                      expire: <string> (ISO date, null when it never expires)
+                      created_at: <string> (ISO date)
+                  count: <number> (Total matching coupons)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1456,6 +1748,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1478,6 +1771,25 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  item: <object> (The partner brand offer that was rewarded)
+                  publiccoupon:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    publicoffer_id: <uuid>
+                    name: <string>
+                    description: <string>
+                    value: <string> (The coupon code of the partner brand)
+                    redirect_link: <string> (Link to redeem on the partner brand)
+                    expire: <string> (ISO date, null when it never expires)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1498,7 +1810,7 @@ paths:
       tags:
         - Cross Selling Offer Reward or Redeem APIs
       summary: Redeem Cross Selling Offer
-      description: Redeem a partner brand offer using wallet points, i.e. coins are deducted from the wallet and a public coupon is generated. Use the publicoffer _id from brandoffers of Fetch Aggreegated Offers. Relevant only for open loop loyalty. Read only api key is sufficient.
+      description: Redeem a partner brand offer using wallet points, i.e. coins are deducted from the wallet and a public coupon is generated. Use the publicoffer _id from brandoffers of Fetch Aggreegated Offers. Relevant only for open loop loyalty. Read only api key is sufficient. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: x-source
           in: header
@@ -1506,6 +1818,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1518,6 +1831,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -1528,6 +1846,25 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  item: <object> (The partner brand offer that was redeemed)
+                  publiccoupon:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    publicoffer_id: <uuid>
+                    name: <string>
+                    description: <string>
+                    value: <string> (The coupon code of the partner brand)
+                    redirect_link: <string> (Link to redeem on the partner brand)
+                    expire: <string> (ISO date, null when it never expires)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1548,7 +1885,7 @@ paths:
       tags:
         - Cross Selling Offer Reward or Redeem APIs
       summary: Get Cross Selling Coupon
-      description: Get details of the cross selling coupon
+      description: Get a single partner brand coupon of the customer by its _id, including the code, status, expiry and the public offer it was generated from. lead_id is required so a customer can only read their own coupons. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: id
           in: path
@@ -1556,18 +1893,21 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: lead_id
           in: query
           description: (Required) (This needs to be leads _id value)
           required: true
           schema:
             type: string
+            format: uuid
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1580,10 +1920,32 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  item:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    publicoffer_id: <uuid>
+                    name: <string>
+                    description: <string>
+                    value: <string> (The coupon code of the partner brand)
+                    redirect_link: <string> (Link to redeem on the partner brand)
+                    expire: <string> (ISO date, null when it never expires)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1604,7 +1966,7 @@ paths:
       tags:
         - Cross Selling Offer Reward or Redeem APIs
       summary: Fetch Cross Selling Coupons
-      description: Fetch the partner brand coupons owned by a customer, i.e. the result of Reward Cross Selling Offer or Redeem Cross Selling Offer.
+      description: Fetch the partner brand coupons owned by a customer, i.e. the result of Reward Cross Selling Offer or Redeem Cross Selling Offer. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: lead_id
           in: query
@@ -1612,42 +1974,51 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: publicoffer_id
           in: query
           description: (This needs to be publiccoupons publicoffer_id value) (Filter coupons generated from a specific partner brand offer)
           schema:
             type: string
+            format: uuid
         - name: id
           in: query
           description: (This needs to be publiccoupons _id value)
           schema:
             type: string
+            format: uuid
         - name: page
           in: query
           description: (Minimum is 1)
           schema:
             type: number
+            minimum: 1
         - name: limit
           in: query
           description: (Minimum is 1) (Maximum is 100)
           schema:
             type: number
+            minimum: 1
+            maximum: 100
         - name: sort
           in: query
           description: (This can only be one of created_at,updated_at)
           schema:
             type: string
+            enum: [created_at, updated_at]
         - name: sort_op
           in: query
           description: (This can only be one of ASC,DESC)
           schema:
             type: string
+            enum: [ASC, DESC]
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1660,10 +2031,33 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  items:
+                    - _id: <uuid>
+                      lead_id: <uuid>
+                      publicoffer_id: <uuid>
+                      name: <string>
+                      description: <string>
+                      value: <string> (The coupon code of the partner brand)
+                      redirect_link: <string> (Link to redeem on the partner brand)
+                      expire: <string> (ISO date, null when it never expires)
+                      created_at: <string> (ISO date)
+                  count: <number> (Total matching coupons)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -1706,6 +2100,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1720,7 +2115,7 @@ paths:
             type: string
         - name: x-leadtoken
           in: header
-          description: (Required only when calling with a read only storefront api key) (This needs to be the lead_token returned by Get User, valid for 1 hour) (When passed, lead_id and customer_id in the body are ignored and the customer is taken from the token)
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
           schema:
             type: string
       requestBody:
@@ -1809,6 +2204,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -1823,7 +2219,7 @@ paths:
             type: string
         - name: x-leadtoken
           in: header
-          description: (Required only when calling with a read only storefront api key) (This needs to be the lead_token returned by Get User, valid for 1 hour) (When passed, lead_id and customer_id in the body are ignored and the customer is taken from the token)
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
           schema:
             type: string
       requestBody:
@@ -1910,11 +2306,13 @@ paths:
           description: (This needs to be triggers _id value) (Fetch a single trigger)
           schema:
             type: string
+            format: uuid
         - name: lead_id
           in: query
           description: (This needs to be leads _id value) (When passed, activities array in the response contains the completion count of each trigger for this customer)
           schema:
             type: string
+            format: uuid
         - name: content_types
           in: query
           description: (This can only be one of earn,social) (Pass multiple times to include more than one content type, ex. content_types=earn&content_types=social) (Defaults to all)
@@ -1932,17 +2330,21 @@ paths:
           description: (Minimum is 1) (Defaults to 1)
           schema:
             type: number
+            minimum: 1
         - name: limit
           in: query
           description: (Minimum is 1) (Maximum is 100) (Defaults to 20)
           schema:
             type: number
+            minimum: 1
+            maximum: 100
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey) (Read only api key is sufficient)
@@ -2043,6 +2445,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey) (Read only api key is sufficient)
@@ -2163,6 +2566,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey) (Read only api key is sufficient)
@@ -2236,6 +2640,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2258,6 +2663,45 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  item:
+                    _id: <uuid>
+                    customer_id: <string> (Your mapping id)
+                    referral_code: <string>
+                    name: <string>
+                    role: <string> (One of primary,secondary)
+                    email: <string> (Masked, ex. jo***@example.com)
+                    mobile: <string> (Masked)
+                    country: <string>
+                    dob: <string> (ISO date or null)
+                    gender: <string>
+                    tags: <array>
+                    accept_email: <boolean>
+                    accept_mobile: <boolean>
+                    wallet_id: <uuid>
+                    creditwallet_id: <uuid>
+                    wallet:
+                      _id: <uuid>
+                      available: <number> (Current coin balance)
+                      tier: <string> (null when the customer has no tier)
+                      membership: <string> (null when the customer has no membership)
+                      transaction_amount: <number> (Lifetime purchase amount)
+                      transaction_count: <number> (Lifetime order count)
+                      total_saving: <number>
+                      total_referral: <number>
+                      internal_tags: <array>
+                    creditwallet:
+                      _id: <uuid>
+                      available_credit: <number> (Current credit balance)
+                    created_at: <string> (ISO date)
+                    updated_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2278,7 +2722,7 @@ paths:
       tags:
         - User APIs
       summary: Update User
-      description: Update details of the user. Only properties that are currently empty are set, a property that already has a value is not overwritten.
+      description: Update details of the user. Only properties that are currently empty are set, a property that already has a value is not overwritten. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: customer_id
           in: query
@@ -2291,12 +2735,14 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2309,6 +2755,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -2319,6 +2770,14 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2338,7 +2797,7 @@ paths:
       tags:
         - User APIs
       summary: Get User
-      description: Get details of the user including the wallet balance, tier, membership and referral code. Look up by lead _id in the path. To look up by customer_id, referral_code, email or mobile instead, pass any placeholder uuidv4 in the path (the path id is always required to keep the API strict) and pass the lookup key in the query, the query value takes precedence. The response also carries lead_token, a 1 hour token identifying this customer, which the Checkout Redemption APIs accept in the x-leadtoken header so the customer id never has to be exposed to the browser.
+      description: Get details of the user including the wallet balance, tier, membership and referral code. Look up by lead _id in the path. To look up by customer_id, referral_code, email or mobile instead, pass any placeholder uuidv4 in the path (the path id is always required to keep the API strict) and pass the lookup key in the query, the query value takes precedence. email and mobile are masked in the response. When looked up by email, mobile or referral_code with a read only api key, the response omits _id, customer_id, wallet_id and creditwallet_id so that a visitor cannot discover another customer's ids, use customer_id or the path id (or a write api key) to get them. When called with a storefront read only api key and x-leaddigest, the response also carries lead_token, a 1 hour token identifying this customer, which every customer scoped API accepts in the x-leadtoken header so the customer id never has to be trusted from the browser. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: customer_id
           in: query
@@ -2366,12 +2825,14 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2384,10 +2845,64 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-timestamp
+          in: header
+          description: (Required when x-leaddigest is passed) (Unix timestamp in seconds, the same value used while computing x-leaddigest) (Must be within 60 minutes of the server time)
+          schema:
+            type: number
+        - name: x-leaddigest
+          in: header
+          description: (Alternative to x-leadtoken for this API only, when using a storefront read only api key) (Hex encoded HMAC-SHA256 of the string customer_id:x-timestamp, signed with your api signing secret, computed on your server) (Pass the same customer_id in the query) (The response then carries lead_token, use it in x-leadtoken on all other customer scoped APIs) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  item:
+                    _id: <uuid>
+                    customer_id: <string> (Your mapping id)
+                    referral_code: <string>
+                    name: <string>
+                    role: <string> (One of primary,secondary)
+                    email: <string> (Masked, ex. jo***@example.com)
+                    mobile: <string> (Masked)
+                    country: <string>
+                    dob: <string> (ISO date or null)
+                    gender: <string>
+                    tags: <array>
+                    accept_email: <boolean>
+                    accept_mobile: <boolean>
+                    wallet_id: <uuid>
+                    creditwallet_id: <uuid>
+                    wallet:
+                      _id: <uuid>
+                      available: <number> (Current coin balance)
+                      tier: <string> (null when the customer has no tier)
+                      membership: <string> (null when the customer has no membership)
+                      transaction_amount: <number> (Lifetime purchase amount)
+                      transaction_count: <number> (Lifetime order count)
+                      total_saving: <number>
+                      total_referral: <number>
+                      internal_tags: <array>
+                    creditwallet:
+                      _id: <uuid>
+                      available_credit: <number> (Current credit balance)
+                    created_at: <string> (ISO date)
+                    updated_at: <string> (ISO date)
+                  lead_token: <string> (Present only when the request was authenticated with x-leaddigest, valid for 1 hour)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2408,7 +2923,7 @@ paths:
       tags:
         - Wallet Reward APIs
       summary: Create Wallet Transaction
-      description: Credit (cr) or debit (dr) coins in the wallet of the user directly. Prefer Reward Using Trigger for earning use cases so that the earning rules configured on the dashboard are applied, use this API for manual adjustments, migrations or custom earning logic that lives in your backend. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      description: Credit (cr) or debit (dr) coins in the wallet of the user directly. Prefer Reward Using Trigger for earning use cases so that the earning rules configured on the dashboard are applied, use this API for manual adjustments, migrations or custom earning logic that lives in your backend. Pass hash to make the call idempotent, a retry with the same hash returns the existing transaction instead of crediting twice. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
       parameters:
         - name: x-source
           in: header
@@ -2416,6 +2931,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2438,6 +2954,28 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean> (false when a transaction with the same hash already existed, item is then the existing transaction and nothing new is created)
+                  item:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    activity_id: <uuid> (Set when created by a trigger)
+                    trigger_id: <uuid> (Set when created by a trigger)
+                    title: <string>
+                    description: <string>
+                    amount: <number>
+                    operation: <string> (One of cr,dr)
+                    type: <string> (One of reward,redeem,revert,adjust,expiry,import)
+                    closing_balance: <number> (Balance after this transaction)
+                    hash: <string> (Your reference, null when not passed)
+                    transacted_at: <string> (ISO date)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2457,7 +2995,7 @@ paths:
       tags:
         - Wallet Reward APIs
       summary: Fetch Wallet Transactions
-      description: Fetch the wallet transactions (coin history) of a customer. Pass hash to find the transaction created against your own reference, ex. an order id.
+      description: Fetch the wallet transactions (coin history) of a customer. Pass hash to find the transaction created against your own reference, ex. an order id. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: lead_id
           in: query
@@ -2465,6 +3003,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: hash
           in: query
           description: (Maximum length is 64) (This needs to be wallettransaction hash value)
@@ -2475,37 +3014,45 @@ paths:
           description: (This needs to be wallettransaction operation value) (This can only be one of cr,dr)
           schema:
             type: string
+            enum: [cr, dr]
         - name: id
           in: query
           description: (This needs to be wallettransaction _id value)
           schema:
             type: string
+            format: uuid
         - name: page
           in: query
           description: (Minimum is 1)
           schema:
             type: number
+            minimum: 1
         - name: limit
           in: query
           description: (Minimum is 1) (Maximum is 100)
           schema:
             type: number
+            minimum: 1
+            maximum: 100
         - name: sort
           in: query
           description: (This can only be one of created_at,updated_at)
           schema:
             type: string
+            enum: [created_at, updated_at]
         - name: sort_op
           in: query
           description: (This can only be one of ASC,DESC)
           schema:
             type: string
+            enum: [ASC, DESC]
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2518,10 +3065,37 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  items:
+                    - _id: <uuid>
+                      lead_id: <uuid>
+                      activity_id: <uuid> (Set when created by a trigger)
+                      trigger_id: <uuid> (Set when created by a trigger)
+                      title: <string>
+                      description: <string>
+                      amount: <number>
+                      operation: <string> (One of cr,dr)
+                      type: <string> (One of reward,redeem,revert,adjust,expiry,import)
+                      closing_balance: <number> (Balance after this transaction)
+                      hash: <string> (Your reference, null when not passed)
+                      transacted_at: <string> (ISO date)
+                      created_at: <string> (ISO date)
+                  count: <number> (Total matching transactions)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2542,7 +3116,7 @@ paths:
       tags:
         - Wallet Reward APIs
       summary: Get Wallet Transaction
-      description: Get details of the wallet transaction
+      description: Get a single wallet transaction of the customer by its _id, including the title, description, operation (cr or dr), amount, hash and created_at. lead_id is required so a customer can only read their own transactions. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: id
           in: path
@@ -2550,18 +3124,21 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: lead_id
           in: query
           description: (Required) (This needs to be leads _id value)
           required: true
           schema:
             type: string
+            format: uuid
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2574,10 +3151,36 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  item:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    activity_id: <uuid> (Set when created by a trigger)
+                    trigger_id: <uuid> (Set when created by a trigger)
+                    title: <string>
+                    description: <string>
+                    amount: <number>
+                    operation: <string> (One of cr,dr)
+                    type: <string> (One of reward,redeem,revert,adjust,expiry,import)
+                    closing_balance: <number> (Balance after this transaction)
+                    hash: <string> (Your reference, null when not passed)
+                    transacted_at: <string> (ISO date)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2606,6 +3209,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2628,6 +3232,28 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean> (false when a transaction with the same hash already existed, item is then the existing transaction and nothing new is created)
+                  item:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    activity_id: <uuid> (Set when created by a trigger)
+                    trigger_id: <uuid> (Set when created by a trigger)
+                    title: <string>
+                    description: <string>
+                    amount: <number>
+                    operation: <string> (One of cr,dr)
+                    type: <string> (One of reward,redeem,revert,adjust,expiry,import)
+                    closing_balance: <number> (Balance after this transaction)
+                    hash: <string> (Your reference, null when not passed)
+                    transacted_at: <string> (ISO date)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2647,7 +3273,7 @@ paths:
       tags:
         - Credit Wallet Reward APIs
       summary: Fetch Credit Wallet Transactions (Limited Access)
-      description: Fetch the credit wallet transactions (credit history) of a customer. Pass hash to find the transaction created against your own reference, ex. an order id.
+      description: Fetch the credit wallet transactions (credit history) of a customer. Pass hash to find the transaction created against your own reference, ex. an order id. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: lead_id
           in: query
@@ -2655,6 +3281,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: hash
           in: query
           description: (Maximum length is 64) (This needs to be creditwallettransaction hash value)
@@ -2665,37 +3292,45 @@ paths:
           description: (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr)
           schema:
             type: string
+            enum: [cr, dr]
         - name: id
           in: query
           description: (This needs to be creditwallettransaction _id value)
           schema:
             type: string
+            format: uuid
         - name: page
           in: query
           description: (Minimum is 1)
           schema:
             type: number
+            minimum: 1
         - name: limit
           in: query
           description: (Minimum is 1) (Maximum is 100)
           schema:
             type: number
+            minimum: 1
+            maximum: 100
         - name: sort
           in: query
           description: (This can only be one of created_at,updated_at)
           schema:
             type: string
+            enum: [created_at, updated_at]
         - name: sort_op
           in: query
           description: (This can only be one of ASC,DESC)
           schema:
             type: string
+            enum: [ASC, DESC]
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2708,10 +3343,37 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  items:
+                    - _id: <uuid>
+                      lead_id: <uuid>
+                      activity_id: <uuid> (Set when created by a trigger)
+                      trigger_id: <uuid> (Set when created by a trigger)
+                      title: <string>
+                      description: <string>
+                      amount: <number>
+                      operation: <string> (One of cr,dr)
+                      type: <string> (One of reward,redeem,revert,adjust,expiry,import)
+                      closing_balance: <number> (Balance after this transaction)
+                      hash: <string> (Your reference, null when not passed)
+                      transacted_at: <string> (ISO date)
+                      created_at: <string> (ISO date)
+                  count: <number> (Total matching transactions)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2732,7 +3394,7 @@ paths:
       tags:
         - Credit Wallet Reward APIs
       summary: Get Credit Wallet Transaction (Limited Access)
-      description: Get details of the credit wallet transaction
+      description: Get a single credit wallet transaction of the customer by its _id, including the title, description, operation (cr or dr), amount, hash and created_at. lead_id is required so a customer can only read their own transactions. Refer to [this article](https://nector.readme.io/docs/authentication) for the authentication flow when calling this API from a storefront or client side environment.
       parameters:
         - name: id
           in: path
@@ -2740,18 +3402,21 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: lead_id
           in: query
           description: (Required) (This needs to be leads _id value)
           required: true
           schema:
             type: string
+            format: uuid
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2764,10 +3429,36 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required when using a storefront read only api key, not needed with a server api key) (This needs to be the lead_token of the customer, a 1 hour JWT returned by Get User via the x-leaddigest flow or generated on your server with your api signing secret) (When passed, the customer is taken from the token and any lead_id or customer_id in the request is ignored) (Learn more about authentication [here](https://nector.readme.io/docs/authentication))
+          schema:
+            type: string
 
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  item:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    activity_id: <uuid> (Set when created by a trigger)
+                    trigger_id: <uuid> (Set when created by a trigger)
+                    title: <string>
+                    description: <string>
+                    amount: <number>
+                    operation: <string> (One of cr,dr)
+                    type: <string> (One of reward,redeem,revert,adjust,expiry,import)
+                    closing_balance: <number> (Balance after this transaction)
+                    hash: <string> (Your reference, null when not passed)
+                    transacted_at: <string> (ISO date)
+                    created_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2788,7 +3479,7 @@ paths:
       tags:
         - Review APIs
       summary: Create Review
-      description: Create a review on behalf of the user. Pass order_id or reference_order_id to mark it as a verified purchase review. Attach images or videos afterwards using Create Upload. Read only api key is sufficient.
+      description: Create a review on behalf of the user. Pass order_id or reference_order_id to mark it as a verified purchase review. Attach already hosted images via image_links, or upload files afterwards using Create Upload. Read only api key is sufficient.
       parameters:
         - name: x-source
           in: header
@@ -2796,6 +3487,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2818,6 +3510,37 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  item:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    order_id: <uuid> (Set for verified purchase reviews)
+                    reference_product_source: <string>
+                    reference_product_id: <string>
+                    reference_product_name: <string>
+                    reference_product_slug: <string>
+                    name: <string> (Reviewer name)
+                    rating: <number> (1 to 5)
+                    description: <string>
+                    reply_to: <string> (Your reply, when added from the dashboard)
+                    image_count: <number>
+                    video_count: <number>
+                    is_verified: <boolean>
+                    is_approved: <boolean>
+                    is_featured: <boolean>
+                    posted_at: <string> (ISO date)
+                    uploads:
+                      - _id: <uuid>
+                        type: <string> (One of image,video)
+                        link: <string>
+                        position: <number>
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2837,13 +3560,14 @@ paths:
       tags:
         - Review APIs
       summary: Fetch Reviews
-      description: Fetch reviews based on various filters
+      description: Fetch reviews with their uploads, plus a rating breakdown in stats for rendering star histograms. Pass reference_product_source and reference_product_id to get the reviews of one product along with the product object. Only approved reviews are returned.
       parameters:
         - name: reference_product_source
           in: query
-          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
+          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce,magento)
           schema:
             type: string
+            enum: [custom_website, shopify, woocommerce, magento]
         - name: reference_product_id
           in: query
           description: (This needs to be products reference_product_id value)
@@ -2854,42 +3578,51 @@ paths:
           description: (This can only be one of true,false) (Filter reviews marked as featured on the dashboard)
           schema:
             type: string
+            enum: ['true', 'false']
         - name: is_verified
           in: query
           description: (This can only be one of true,false) (Filter reviews attached to an order, i.e. verified purchase reviews)
           schema:
             type: string
+            enum: ['true', 'false']
         - name: id
           in: query
           description: (This needs to be reviews _id value)
           schema:
             type: string
+            format: uuid
         - name: page
           in: query
           description: (Minimum is 1)
           schema:
             type: number
+            minimum: 1
         - name: limit
           in: query
           description: (Minimum is 1) (Maximum is 100)
           schema:
             type: number
+            minimum: 1
+            maximum: 100
         - name: sort
           in: query
           description: (This can only be one of created_at,updated_at)
           schema:
             type: string
+            enum: [created_at, updated_at]
         - name: sort_op
           in: query
           description: (This can only be one of ASC,DESC)
           schema:
             type: string
+            enum: [ASC, DESC]
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2906,6 +3639,41 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  items:
+                    - _id: <uuid>
+                      lead_id: <uuid>
+                      order_id: <uuid> (Set for verified purchase reviews)
+                      reference_product_source: <string>
+                      reference_product_id: <string>
+                      reference_product_name: <string>
+                      reference_product_slug: <string>
+                      name: <string> (Reviewer name)
+                      rating: <number> (1 to 5)
+                      description: <string>
+                      reply_to: <string> (Your reply, when added from the dashboard)
+                      image_count: <number>
+                      video_count: <number>
+                      is_verified: <boolean>
+                      is_approved: <boolean>
+                      is_featured: <boolean>
+                      posted_at: <string> (ISO date)
+                      uploads:
+                        - _id: <uuid>
+                          type: <string> (One of image,video)
+                          link: <string>
+                          position: <number>
+                  count: <number> (Total matching reviews)
+                  stats:
+                    - rating: <number> (1 to 5)
+                      count: <number> (Reviews with this rating, for rendering the rating breakdown)
+                  product: <object> (The product when reference_product_source and reference_product_id are passed)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2934,12 +3702,14 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -2956,6 +3726,36 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  item:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    order_id: <uuid> (Set for verified purchase reviews)
+                    reference_product_source: <string>
+                    reference_product_id: <string>
+                    reference_product_name: <string>
+                    reference_product_slug: <string>
+                    name: <string> (Reviewer name)
+                    rating: <number> (1 to 5)
+                    description: <string>
+                    reply_to: <string> (Your reply, when added from the dashboard)
+                    image_count: <number>
+                    video_count: <number>
+                    is_verified: <boolean>
+                    is_approved: <boolean>
+                    is_featured: <boolean>
+                    posted_at: <string> (ISO date)
+                    uploads:
+                      - _id: <uuid>
+                        type: <string> (One of image,video)
+                        link: <string>
+                        position: <number>
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -2976,13 +3776,14 @@ paths:
       tags:
         - Review APIs
       summary: Get Review Count
-      description: Get review count for the passed filters
+      description: Get the number of reviews and the sum of their ratings for a product, so the average rating can be computed as sum divided by count. Cached for 10 minutes.
       parameters:
         - name: reference_product_source
           in: query
-          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
+          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce,magento)
           schema:
             type: string
+            enum: [custom_website, shopify, woocommerce, magento]
         - name: reference_product_id
           in: query
           description: (This needs to be products reference_product_id value)
@@ -2994,6 +3795,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -3010,6 +3812,16 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  countsum:
+                    count: <number> (Number of reviews)
+                    sum: <number> (Sum of ratings, average rating = sum / count)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -3038,6 +3850,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -3060,6 +3873,25 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  item:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    reference_product_source: <string>
+                    reference_product_id: <string>
+                    reference_product_name: <string>
+                    name: <string> (Asker name)
+                    question: <string>
+                    answer: <string> (null until answered from the dashboard)
+                    is_approved: <boolean>
+                    posted_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -3079,13 +3911,14 @@ paths:
       tags:
         - QnA APIs
       summary: Fetch QnAs
-      description: Fetch qnas based on various filters
+      description: Fetch product questions and their answers. Pass reference_product_source and reference_product_id to get the qnas of one product. Only approved qnas are returned.
       parameters:
         - name: reference_product_source
           in: query
-          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
+          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce,magento)
           schema:
             type: string
+            enum: [custom_website, shopify, woocommerce, magento]
         - name: reference_product_id
           in: query
           description: (This needs to be products reference_product_id value)
@@ -3096,32 +3929,39 @@ paths:
           description: (This needs to be qnas _id value)
           schema:
             type: string
+            format: uuid
         - name: page
           in: query
           description: (Minimum is 1)
           schema:
             type: number
+            minimum: 1
         - name: limit
           in: query
           description: (Minimum is 1) (Maximum is 100)
           schema:
             type: number
+            minimum: 1
+            maximum: 100
         - name: sort
           in: query
           description: (This can only be one of created_at,updated_at)
           schema:
             type: string
+            enum: [created_at, updated_at]
         - name: sort_op
           in: query
           description: (This can only be one of ASC,DESC)
           schema:
             type: string
+            enum: [ASC, DESC]
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -3138,6 +3978,25 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  items:
+                    - _id: <uuid>
+                      lead_id: <uuid>
+                      reference_product_source: <string>
+                      reference_product_id: <string>
+                      reference_product_name: <string>
+                      name: <string> (Asker name)
+                      question: <string>
+                      answer: <string> (null until answered from the dashboard)
+                      is_approved: <boolean>
+                      posted_at: <string> (ISO date)
+                  count: <number> (Total matching qnas)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -3166,12 +4025,14 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -3188,6 +4049,24 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  item:
+                    _id: <uuid>
+                    lead_id: <uuid>
+                    reference_product_source: <string>
+                    reference_product_id: <string>
+                    reference_product_name: <string>
+                    name: <string> (Asker name)
+                    question: <string>
+                    answer: <string> (null until answered from the dashboard)
+                    is_approved: <boolean>
+                    posted_at: <string> (ISO date)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -3208,13 +4087,14 @@ paths:
       tags:
         - QnA APIs
       summary: Get QnA Count
-      description: Get qna count for the passed filters
+      description: Get the number of qnas for a product. Cached for 10 minutes.
       parameters:
         - name: reference_product_source
           in: query
-          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
+          description: (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce,magento)
           schema:
             type: string
+            enum: [custom_website, shopify, woocommerce, magento]
         - name: reference_product_id
           in: query
           description: (This needs to be products reference_product_id value)
@@ -3226,6 +4106,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -3242,6 +4123,15 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  countsum:
+                    count: <number> (Number of qnas)
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
@@ -3270,6 +4160,7 @@ paths:
           required: true
           schema:
             type: string
+            enum: [mobile, unix, web]
         - name: x-apikey
           in: header
           description: (Required) (This needs to be your apikey)
@@ -3292,6 +4183,21 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  success: <boolean>
+                  item:
+                    _id: <uuid>
+                    parent_id: <uuid>
+                    parent_type: <string> (One of reviews,qnas)
+                    type: <string> (One of image,video)
+                    link: <string> (Public URL of the uploaded file)
+                    position: <number>
         "4XX":
           description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
           content:
