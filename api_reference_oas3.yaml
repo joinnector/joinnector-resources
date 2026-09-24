@@ -13,11 +13,33 @@ info:
         - We only support UUIDV4
         - Contact us at support@nector.io for more information
 
+    API keys
+
+        - Read only api key: safe to use from your frontend (web or mobile). Enough for every GET API and for Redeem Offer, Redeem Cross Selling Offer, Checkout Redemption APIs (with x-leadtoken), Create Review, Create QnA, Create Upload and the Referral APIs
+        - Full access api key: use only from your backend. Required for Create User, Reward Using Trigger, Create Wallet Transaction, Create Credit Wallet Transaction, Reward Offer and Reward Cross Selling Offer
+        - Generate api keys from the dashboard (Settings > API Keys)
+
+    Recommended integration flow
+
+        1. Fetch Aggreegated Details once on app load to get the program settings (coin name, earning ratio, tiers, memberships and so on)
+        2. Create User (from your backend) when a customer signs up, then Get User to fetch their wallet balance, tier and membership
+        3. Fetch Triggers to render the earning rules and call Reward Using Trigger (from your backend) when the customer completes an action
+        4. Fetch Aggreegated Offers to render the redemption rules and call Redeem Offer when the customer spends coins, then Fetch Coupons to show the coupons they own
+
+    Responses
+
+        - Every response is a JSON object with meta and data. On success meta.status is success and data holds the result (item for a single record, items and count for a list)
+        - On failure the HTTP status code is non 200, meta.status is error, meta.code repeats the status code and data.message explains the reason. See the 4XX and 5XX responses of each API for the list of codes
+        - 422 is the usual failure for business rules (ex. Lead does not exists, No discount is available, Offer is not valid) and data.message is safe to show to the customer
+
     Get started by creating an account on https://merchant.nector.io
   contact:
     name: nector
     url: https://nector.io?utm_source=api_doc
     email: support@nector.io
+  license:
+    name: MIT
+    url: https://github.com/joinnector/joinnector-resources/blob/master/LICENSE
   version: 1.0.0
 servers:
   - url: https://platform.nector.io/api/v2/merchant
@@ -49,11 +71,37 @@ components:
       properties:
         meta:
           type: object
+          properties:
+            request_id:
+              type: string
+              description: (Unique id of the request, share this with support@nector.io when reporting an issue)
+            start_timestamp:
+              type: string
+              description: (ISO date when the request was received)
+            end_timestamp:
+              type: string
+              description: (ISO date when the response was sent)
+            code:
+              type: number
+              description: (Same as the HTTP status code)
+            status:
+              type: string
+              description: (Always error for a failed request)
         data:
           type: object
+          properties:
+            message:
+              type: string
+              description: (Human readable reason, safe to show to the customer for 422 responses, ex. No discount is available)
       example:
-        meta: {}
-        data: {}
+        meta:
+          request_id: <uuid>
+          start_timestamp: <string> (ISO date)
+          end_timestamp: <string> (ISO date)
+          code: 422
+          status: error
+        data:
+          message: <string> (Human readable reason)
 
     merchant_create_activities:
       title: merchant_create_activities
@@ -83,8 +131,8 @@ components:
             description: <string> (Any string that needs to be passed as a description) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
             operation: <string> (This can only be one of cr,dr) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
             coin_range:
-              min: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
-              max: <number> (This is the range between which the wallet point will be rewarded) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
+              min: 10
+              max: 10
           via_api_for_offer:
             offer_id: <uuid> (This needs to be offers _id value) (This will be ignored if the trigger is not of type offer reward or value override is not allowed)
           via_api_for_email:
@@ -106,7 +154,7 @@ components:
       properties:
         offer_id:
           type: string
-          description: (Required) (This needs to be offers _id value)
+          description: (Required) (This needs to be offers _id value) (Use the _id from businessoffers items of Fetch Aggreegated Offers)
         lead_id:
           type: string
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
@@ -114,7 +162,7 @@ components:
           type: string
           description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
       example:
-        offer_id: <uuid> (Required) (This needs to be offers _id value)
+        offer_id: <uuid> (Required) (This needs to be offers _id value) (Use the _id from businessoffers items of Fetch Aggreegated Offers)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
 
@@ -126,7 +174,7 @@ components:
       properties:
         offer_id:
           type: string
-          description: (Required) (This needs to be offers _id value)
+          description: (Required) (This needs to be offers _id value) (Use the _id from businessoffers items of Fetch Aggreegated Offers)
         lead_id:
           type: string
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
@@ -134,7 +182,7 @@ components:
           type: string
           description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
       example:
-        offer_id: <uuid> (Required) (This needs to be offers _id value)
+        offer_id: <uuid> (Required) (This needs to be offers _id value) (Use the _id from businessoffers items of Fetch Aggreegated Offers)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
 
@@ -146,7 +194,7 @@ components:
       properties:
         publicoffer_id:
           type: string
-          description: (Required) (This needs to be offers _id value)
+          description: (Required) (This needs to be publicoffers _id value) (Use the _id from brandoffers items of Fetch Aggreegated Offers)
         lead_id:
           type: string
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
@@ -154,7 +202,7 @@ components:
           type: string
           description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
       example:
-        publicoffer_id: <uuid> (Required) (This needs to be publicoffers _id value)
+        publicoffer_id: <uuid> (Required) (This needs to be publicoffers _id value) (Use the _id from brandoffers items of Fetch Aggreegated Offers)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
 
@@ -166,7 +214,7 @@ components:
       properties:
         publicoffer_id:
           type: string
-          description: (Required) (This needs to be offers _id value)
+          description: (Required) (This needs to be publicoffers _id value) (Use the _id from brandoffers items of Fetch Aggreegated Offers)
         lead_id:
           type: string
           description: (One of lead_id, customer_id is required) (This needs to be leads _id value)
@@ -174,12 +222,16 @@ components:
           type: string
           description: (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
       example:
-        publicoffer_id: <uuid> (Required) (This needs to be publicoffers _id value)
+        publicoffer_id: <uuid> (Required) (This needs to be publicoffers _id value) (Use the _id from brandoffers items of Fetch Aggreegated Offers)
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
 
     merchant_create_leads:
       title: merchant_create_leads
+      required:
+        - customer_id
+        - name
+        - metadetail
       type: object
       properties:
         customer_id:
@@ -189,6 +241,8 @@ components:
           type: string
           description: (Required) (This is full name of the user ex. John Wick) (Maximum length is 200)
         metadetail:
+          type: object
+          description: (Required) (One of email or mobile must be passed inside metadetail)
           properties:
             email:
               type: string
@@ -198,17 +252,17 @@ components:
               description: (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
             country:
               type: string
-              description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+              description: (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
             dob:
               type: string
               description: (This needs to be ISO format date only)
       example:
-        customer_id: <string> (Required) (Make sure this is not predictable value. ex any uuid value) (Minimum length is 1) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
+        customer_id: <string> (Required) (Make sure this is not predictable value. ex any uuid value) (Minimum length is 8) (Maximum length is 128) (This is the mapping id between your system and nector, this value can be used to pull the details of the customer)
         name: <string> (Required) (This is full name of the user ex. John Wick) (Maximum length is 200)
         metadetail:
-          email: <string> (One of mobile or email is required) (One of mobile or email is required) (This needs to be valid email)
+          email: <string> (One of mobile or email is required) (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
-          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+          country: <string> (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
           dob: <string> (This needs to be ISO format date only)
 
     merchant_update_leads:
@@ -228,7 +282,6 @@ components:
       title: merchant_create_wallettransactions
       required:
         - title
-        - description
         - amount
         - operation
       type: object
@@ -247,27 +300,26 @@ components:
           description: (This needs to be wallettransaction description)
         amount:
           type: number
-          description: (Required) (This needs to be the coin amount)
+          description: (Required) (Minimum is 1) (This needs to be the coin amount)
         hash:
           type: string
-          description: (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector)
+          description: (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector, ex. your order id, and can later be used to filter transactions)
         operation:
           type: string
-          description: (Required) (This needs to be wallettransaction operation value) (This can only be one of cr,dr)
+          description: (Required) (This needs to be wallettransaction operation value) (This can only be one of cr,dr) (cr credits coins to the wallet, dr debits coins from the wallet)
       example:
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
-        title: <string> (Required) (Required) (This needs to be wallet transaction title)
-        description: <string> (This needs to be wallet transaction description)
+        title: <string> (Required) (This needs to be wallettransaction title)
+        description: <string> (This needs to be wallettransaction description)
         amount: 12
         hash: <string> (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector)
-        operation: <string> (Required) (This needs to be wallettransaction operation value) (This can only be one of cr,dr)
+        operation: <string> (Required) (This needs to be wallettransaction operation value) (This can only be one of cr,dr) (cr credits coins to the wallet, dr debits coins from the wallet)
 
     merchant_create_creditwallettransactions:
       title: merchant_create_creditwallettransactions
       required:
         - title
-        - description
         - amount
         - operation
       type: object
@@ -289,18 +341,18 @@ components:
           description: (Required) (This needs to be the credit amount, 1 credit = $1)
         hash:
           type: string
-          description: (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector)
+          description: (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector, ex. your order id, and can later be used to filter transactions)
         operation:
           type: string
-          description: (Required) (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr)
+          description: (Required) (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr) (cr credits the credit wallet, dr debits the credit wallet)
       example:
         lead_id: <uuid> (One of lead_id, customer_id is required) (This needs to be leads _id value)
         customer_id: <string> (One of lead_id, customer_id is required) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
-        title: <string> (Required) (Required) (This needs to be wallet transaction title)
-        description: <string> (This needs to be wallet transaction description)
+        title: <string> (Required) (This needs to be creditwallettransaction title)
+        description: <string> (This needs to be creditwallettransaction description)
         amount: 12
         hash: <string> (Maximum length is 64) (This can be any hash value that you want to pass for mapping between your system and nector)
-        operation: <string> (Required) (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr)
+        operation: <string> (Required) (This needs to be creditwallettransaction operation value) (This can only be one of cr,dr) (cr credits the credit wallet, dr debits the credit wallet)
 
     merchant_create_reviews:
       title: merchant_create_reviews
@@ -322,10 +374,13 @@ components:
               description: (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
             country:
               type: string
-              description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+              description: (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
         order_id:
           type: string
-          description: (This needs to be orders _id value) (If this is passed then the review will be attched against an order and the review will be marked as verified)
+          description: (This needs to be orders _id value) (If this is passed then the review will be attached against an order and the review will be marked as verified)
+        reference_order_id:
+          type: string
+          description: (Minimum length is 1) (Maximum length is 128) (This needs to be the order id on your platform, ex. shopify order id) (Alternative to order_id, if this is passed then the review will be attached against the matching order and the review will be marked as verified)
         reference_product_source:
           type: string
           description: (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
@@ -343,10 +398,11 @@ components:
           description: (Required) (This needs to be description of the review)
       example:
         metadetail:
-          email: <string> (One of mobile or email is required) (One of mobile or email is required) (This needs to be valid email)
+          email: <string> (One of mobile or email is required) (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
-          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
-        order_id: <uuid> (This needs to be orders _id value) (If this is passed then the review will be attched against an order and the review will be marked as verified)
+          country: <string> (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
+        order_id: <uuid> (This needs to be orders _id value) (If this is passed then the review will be attached against an order and the review will be marked as verified)
+        reference_order_id: <string> (Minimum length is 1) (Maximum length is 128) (This needs to be the order id on your platform, ex. shopify order id) (Alternative to order_id)
         reference_product_source: <string> (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
         reference_product_id: <string> (Required) (This needs to be products reference_product_id value)
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the review)
@@ -372,7 +428,7 @@ components:
               description: (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
             country:
               type: string
-              description: (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+              description: (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
         reference_product_source:
           type: string
           description: (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
@@ -387,9 +443,9 @@ components:
           description: (Required) (This needs to be the question of the user)
       example:
         metadetail:
-          email: <string> (One of mobile or email is required) (One of mobile or email is required) (This needs to be valid email)
+          email: <string> (One of mobile or email is required) (This needs to be valid email)
           mobile: <string> (Minimum length is 4) (Maximum length is 15) (One of mobile or email is required)
-          country: <string> (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+          country: <string> (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
         reference_product_source: <string> (Required) (This needs to be products reference_product_source value) (This can only be one of custom_website,shopify,woocommerce)
         reference_product_id: <string> (Required) (This needs to be products reference_product_id value)
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is writing the qna)
@@ -398,10 +454,15 @@ components:
     merchant_create_uploads:
       title: merchant_create_uploads
       required:
+        - file
         - parent_id
         - parent_type
       type: object
       properties:
+        file:
+          type: string
+          format: binary
+          description: (Required) (The image or video file to upload, sent as the file field of a multipart/form-data request)
         parent_id:
           type: string
           description: (Required) (This needs to be reviews or qnas _id value)
@@ -410,8 +471,9 @@ components:
           description: (Required) (This can only be one of reviews,qnas)
         position:
           type: number
-          description: (Minimum is 1) (This needs to position of the upload)
+          description: (Minimum is 1) (Defaults to 1) (This needs to be the position of the upload among the uploads of the same review or qna)
       example:
+        file: <binary> (Required) (The image or video file)
         parent_id: <string> (Required) (This needs to be reviews or qnas _id value)
         parent_type: <string> (Required) (This can only be one of reviews,qnas)
         position: 1
@@ -425,7 +487,7 @@ components:
       properties:
         referred_by_referral_code:
           type: string
-          description: (Required) (This needs to leads referral_code value of the customer who is referring)
+          description: (Required) (This needs to be leads referral_code value of the customer who is referring)
         name:
           type: string
           description: (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
@@ -435,7 +497,7 @@ components:
               type: string
               description: (Required) (This needs to be valid email)
       example:
-        referred_by_referral_code: <string> (Required) (This needs to leads referral_code value of the customer who is referring)
+        referred_by_referral_code: <string> (Required) (This needs to be leads referral_code value of the customer who is referring)
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
         metadetail:
           email: <string> (Required) (This needs to be valid email)
@@ -449,7 +511,7 @@ components:
       properties:
         referred_by_referral_code:
           type: string
-          description: (Required) (This needs to leads referral_code value of the customer who is referring)
+          description: (Required) (This needs to be leads referral_code value of the customer who is referring)
         name:
           type: string
           description: (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
@@ -460,13 +522,13 @@ components:
               description: (Required) (Minimum length is 4) (Maximum length is 15)
             country:
               type: string
-              description: (Required) (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+              description: (Required) (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
       example:
-        referred_by_referral_code: <string> (Required) (This needs to leads referral_code value of the customer who is referring)
+        referred_by_referral_code: <string> (Required) (This needs to be leads referral_code value of the customer who is referring)
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
         metadetail:
           mobile: <string> (Required) (Minimum length is 4) (Maximum length is 15)
-          country: <string> (Required) (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+          country: <string> (Required) (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
 
     merchant_create_inviteviaemailleads:
       title: merchant_create_inviteviaemailleads
@@ -477,7 +539,7 @@ components:
       properties:
         referred_by_referral_code:
           type: string
-          description: (Required) (This needs to leads referral_code value of the customer who is referring)
+          description: (Required) (This needs to be leads referral_code value of the customer who is referring)
         name:
           type: string
           description: (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
@@ -487,7 +549,7 @@ components:
               type: string
               description: (Required) (This needs to be valid email)
       example:
-        referred_by_referral_code: <string> (Required) (This needs to leads referral_code value of the customer who is referring)
+        referred_by_referral_code: <string> (Required) (This needs to be leads referral_code value of the customer who is referring)
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
         metadetail:
           email: <string> (Required) (This needs to be valid email)
@@ -501,7 +563,7 @@ components:
       properties:
         referred_by_referral_code:
           type: string
-          description: (Required) (This needs to leads referral_code value of the customer who is referring)
+          description: (Required) (This needs to be leads referral_code value of the customer who is referring)
         name:
           type: string
           description: (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
@@ -512,13 +574,105 @@ components:
               description: (Required) (Minimum length is 4) (Maximum length is 15)
             country:
               type: string
-              description: (Required) (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+              description: (Required) (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
       example:
-        referred_by_referral_code: <string> (Required) (This needs to leads referral_code value of the customer who is referring)
+        referred_by_referral_code: <string> (Required) (This needs to be leads referral_code value of the customer who is referring)
         name: <string> (Required) (Maximum length is 200) (This needs to be the name of the user who is getting referred)
         metadetail:
           mobile: <string> (Required) (Minimum length is 4) (Maximum length is 15)
-          country: <string> (Required) (This needs to one of the allowed countries and must be passed when the mobile is passed) (Should be 3 character long and lowercase ex. usa)
+          country: <string> (Required) (This needs to be one of the allowed countries, required when mobile is passed) (Should be 3 character long and lowercase ex. usa)
+
+    merchant_create_checkoutcheckboxactions:
+      title: merchant_create_checkoutcheckboxactions
+      required:
+        - action
+        - amount
+      type: object
+      properties:
+        lead_id:
+          type: string
+          description: (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
+        action:
+          type: string
+          description: (Required) (This can only be one of list,perform,revert) (list returns the discount the customer can get for this cart, perform generates the discount coupon, revert cancels the coupon generated earlier)
+        amount:
+          type: number
+          description: (Required) (Minimum is 1) (This needs to be the cart total amount in your store currency, before the loyalty discount)
+      example:
+        lead_id: <uuid> (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (This needs to be leads _id value)
+        customer_id: <string> (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
+        action: <string> (Required) (This can only be one of list,perform,revert)
+        amount: 1500
+
+    merchant_create_checkoutpageactions:
+      title: merchant_create_checkoutpageactions
+      required:
+        - action
+        - amount
+      type: object
+      properties:
+        lead_id:
+          type: string
+          description: (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (This needs to be leads _id value)
+        customer_id:
+          type: string
+          description: (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
+        action:
+          type: string
+          description: (Required) (This can only be one of list,perform,revert) (list returns the maximum discount and the step size the customer can redeem for this cart, perform generates the discount coupon for the chosen step, revert cancels the coupon generated earlier)
+        amount:
+          type: number
+          description: (Required) (Minimum is 1) (This needs to be the cart total amount in your store currency, before the loyalty discount)
+        step:
+          type: number
+          description: (Required when action is perform) (Minimum is 1) (Number of steps the customer chose to redeem, must be less than or equal to delta_step returned by the list action) (Coins deducted = delta_mincoinperstep x step, discount = delta_minfiatperstep x step)
+        line_items:
+          type: array
+          description: (Optional) (Pass the cart line items when the checkout page offer is restricted to specific products or collections, so that the discount is calculated only on the applicable items) (When omitted the full cart amount is considered applicable)
+          items:
+            type: object
+            required:
+              - reference_product_id
+              - reference_product_source
+              - quantity
+              - price
+              - discount_amount
+              - total_amount
+            properties:
+              reference_product_id:
+                type: string
+                description: (Required) (This needs to be the product id on your platform, ex. shopify product id)
+              reference_product_source:
+                type: string
+                description: (Required) (This can only be one of custom_website,shopify,woocommerce)
+              quantity:
+                type: number
+                description: (Required) (Minimum is 0)
+              price:
+                type: number
+                description: (Required) (Minimum is 0) (Unit price of the product)
+              discount_amount:
+                type: number
+                description: (Required) (Minimum is 0) (Discount already applied on this line)
+              total_amount:
+                type: number
+                description: (Required) (Minimum is 0) (Line total after discount, this is the amount used for the applicable cart calculation)
+      example:
+        lead_id: <uuid> (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (This needs to be leads _id value)
+        customer_id: <string> (One of lead_id, customer_id is required, unless x-leadtoken header is passed) (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value)
+        action: <string> (Required) (This can only be one of list,perform,revert)
+        amount: 1500
+        step: 3
+        line_items:
+          - reference_product_id: <string> (Required) (This needs to be the product id on your platform)
+            reference_product_source: <string> (Required) (This can only be one of custom_website,shopify,woocommerce)
+            quantity: 1
+            price: 1500
+            discount_amount: 0
+            total_amount: 1500
 
     subschema_trace:
       title: subschema_trace
@@ -583,7 +737,14 @@ components:
           description: <string> (This can only be one of cr,dr) (This will be ignored if the trigger is not of type wallet reward or value override is not allowed)
         coin_range:
           type: object
-          description: (This is the range between which the wallet point will be rewarded) (This will be ignored if the rule is not of type wallet reward or it does not allow value override)
+          description: (This is the range between which the wallet point will be rewarded, pass the same value for min and max to reward a fixed amount) (This will be ignored if the rule is not of type wallet reward or it does not allow value override)
+          properties:
+            min:
+              type: number
+              description: (Minimum is 0) (Lower bound of the coins to reward)
+            max:
+              type: number
+              description: (Minimum is 0) (Upper bound of the coins to reward)
 
     subschema_trace_offer_reward:
       title: subschema_trace_offer_reward
@@ -629,31 +790,40 @@ components:
           type: string
           description: (This needs to be valid secret, based on this the business can verify the webhook) (This will be ignored if the trigger is not of type webhook reward or value override is not allowed)
 
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-
 tags:
   - name: Trigger APIs (Easiest way to start rewarding with nector)
+    description: Reward a customer by firing a trigger configured on the dashboard. The trigger decides what is rewarded (coins, offer, email, event or webhook) and how often, so your code only needs the trigger id.
   - name: User APIs
+    description: Create and fetch customers (leads). A lead holds the wallet balance, tier, membership and referral code of the customer.
   - name: Wallet Reward APIs
+    description: Credit or debit coins in the primary wallet of a customer directly and fetch the wallet transactions.
   - name: Credit Wallet Reward APIs
-  - name: Offer Reward APIs
-  - name: Cross Selling Offer Reward APIs
+    description: Credit or debit the secondary credit wallet (store credit, gift cards, returns) where 1 credit = 1 unit of your currency. Available on select plans only.
+  - name: Offer Reward or Redeem APIs
+    description: Give an offer to a customer for free (reward) or let them spend coins on it (redeem), and fetch the resulting coupons. Offer ids come from businessoffers of Fetch Aggreegated Offers.
+  - name: Cross Selling Offer Reward or Redeem APIs
+    description: Same as Offer Reward or Redeem APIs but for partner brand offers (open loop loyalty). Public offer ids come from brandoffers of Fetch Aggreegated Offers.
+  - name: Checkout Redemption APIs
+    description: Let the customer redeem coins directly on your checkout as a discount code. Backed by the Checkout Checkbox and Checkout Page actions configured on the dashboard, each action uses its own offer (classification action_checkoutcheckbox or action_checkoutpage) to decide the coin to discount ratio. Currently the generated discount code is created on Shopify, so the offer rule type must be shopify.
   - name: Review APIs
+    description: Create and fetch product reviews collected on behalf of your customers.
   - name: QnA APIs
+    description: Create and fetch product questions collected on behalf of your customers.
   - name: Referral APIs
-  - name: Misc APIs
-  - name: Various Listing APIs
+    description: Claim a referral code, invite friends and fetch the referrals of a customer.
+  - name: Upload Image or Video APIs
+    description: Attach an image or video to a review or qna.
+  - name: Earning, Redemption & Settings Listing APIs
+    description: Read only APIs that return the loyalty program configuration in one call each, the earning rules (triggers), the redemption rules (offers) and the program settings. Use these to render the program on your app or website.
 
 paths:
   /activities:
     post:
+      operationId: merchantv2_create_activities
       tags:
         - Trigger APIs (Easiest way to start rewarding with nector)
       summary: Reward Using Trigger
-      description: This API is used to reward users based on the trigger. The trigger can be any of the following wallet reward, offer reward, email, event, or webhook. The trigger can be set up in the Nector dashboard.
+      description: This API is used to reward users based on the trigger. The trigger can be any of the following wallet reward, offer reward, email, event, or webhook. The trigger can be set up in the Nector dashboard and its _id can be fetched using Fetch Triggers. The earning rule of the trigger (once, once in a period, on activity count reached and so on) is evaluated on our side, so it is safe to call this API on every occurrence of the action. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
       parameters:
         - name: x-source
           in: header
@@ -683,10 +853,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /leads-referral-via-email:
     post:
+      operationId: merchantv2_create_referralviaemailleads
       tags:
         - Referral APIs
       summary: Claim Referral Code via Email
@@ -720,10 +903,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /leads-referral-via-mobile:
     post:
+      operationId: merchantv2_create_referralviamobileleads
       tags:
         - Referral APIs
       summary: Claim Referral Code via Mobile Number
@@ -757,10 +953,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /leads-invite-via-email:
     post:
+      operationId: merchantv2_create_inviteviaemailleads
       tags:
         - Referral APIs
       summary: Invite Friends via Email
@@ -794,10 +1003,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /leads-invite-via-mobile:
     post:
+      operationId: merchantv2_create_inviteviamobileleads
       tags:
         - Referral APIs
       summary: Invite Friends via Mobile Number
@@ -831,10 +1053,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /referrals/{id}:
     get:
+      operationId: merchantv2_get_referrals
       tags:
         - Referral APIs
       summary: Get Referral
@@ -842,7 +1077,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: (Required) (This can be any valid uuidv4 value or referral _id value)
+          description: (Required) (This needs to be referrals _id value)
           required: true
           schema:
             type: string
@@ -878,10 +1113,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /referrals:
     get:
+      operationId: merchantv2_list_referrals
       tags:
         - Referral APIs
       summary: Fetch Referrals
@@ -899,7 +1147,7 @@ paths:
             type: string
         - name: id
           in: query
-          description: (This needs to be coupons _id value)
+          description: (This needs to be referrals _id value)
           schema:
             type: string
         - name: page
@@ -944,14 +1192,27 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /offerrewards:
     post:
+      operationId: merchantv2_create_offerrewards
       tags:
-        - Offer Reward APIs
+        - Offer Reward or Redeem APIs
       summary: Reward Offer
-      description: Reward an offer without using wallet points. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      description: Reward an offer to the customer for free, i.e. a coupon is generated without deducting wallet points. Use the offer _id from businessoffers of Fetch Aggreegated Offers. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
       parameters:
         - name: x-source
           in: header
@@ -981,14 +1242,27 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /offerredeems:
     post:
+      operationId: merchantv2_create_offerredeems
       tags:
-        - Offer Reward APIs
+        - Offer Reward or Redeem APIs
       summary: Redeem Offer
-      description: Redeem a offer using wallet points.
+      description: Redeem an offer using wallet points, i.e. the coin_amount of the offer rule is deducted from the wallet and a coupon is generated. Use the offer _id from businessoffers of Fetch Aggreegated Offers. Only offers in published status can be redeemed, listed offers are display only. Read only api key is sufficient.
       parameters:
         - name: x-source
           in: header
@@ -1018,18 +1292,31 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /coupons/{id}:
     get:
+      operationId: merchantv2_get_coupons
       tags:
-        - Offer Reward APIs
+        - Offer Reward or Redeem APIs
       summary: Get Coupon
       description: Get details of the coupon
       parameters:
         - name: id
           in: path
-          description: (Required) (This can be any valid uuidv4 value or coupons _id value)
+          description: (Required) (This needs to be coupons _id value)
           required: true
           schema:
             type: string
@@ -1061,14 +1348,27 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /coupons:
     get:
+      operationId: merchantv2_list_coupons
       tags:
-        - Offer Reward APIs
+        - Offer Reward or Redeem APIs
       summary: Fetch Coupons
-      description: Fetch coupons based on various filters
+      description: Fetch the coupons owned by a customer, i.e. the result of Reward Offer, Redeem Offer or an offer reward trigger. Each coupon carries the code, status, expiry and the offer it was generated from.
       parameters:
         - name: lead_id
           in: query
@@ -1078,7 +1378,7 @@ paths:
             type: string
         - name: offer_id
           in: query
-          description: (This needs to be coupons offer_id value)
+          description: (This needs to be coupons offer_id value) (Filter coupons generated from a specific offer)
           schema:
             type: string
         - name: id
@@ -1128,14 +1428,27 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /publicofferrewards:
     post:
+      operationId: merchantv2_create_publicofferrewards
       tags:
-        - Cross Selling Offer Reward APIs
+        - Cross Selling Offer Reward or Redeem APIs
       summary: Reward Cross Selling Offer
-      description: Reward a cross selling offer without using wallet points. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      description: Reward a partner brand offer to the customer for free, i.e. a public coupon is generated without deducting wallet points. Use the publicoffer _id from brandoffers of Fetch Aggreegated Offers. Relevant only for open loop loyalty. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
       parameters:
         - name: x-source
           in: header
@@ -1165,14 +1478,27 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /publicofferredeems:
     post:
+      operationId: merchantv2_create_publicofferredeems
       tags:
-        - Cross Selling Offer Reward APIs
+        - Cross Selling Offer Reward or Redeem APIs
       summary: Redeem Cross Selling Offer
-      description: Redeem a cross selling offer using wallet points.
+      description: Redeem a partner brand offer using wallet points, i.e. coins are deducted from the wallet and a public coupon is generated. Use the publicoffer _id from brandoffers of Fetch Aggreegated Offers. Relevant only for open loop loyalty. Read only api key is sufficient.
       parameters:
         - name: x-source
           in: header
@@ -1202,18 +1528,31 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /publiccoupons/{id}:
     get:
+      operationId: merchantv2_get_publiccoupons
       tags:
-        - Cross Selling Offer Reward APIs
+        - Cross Selling Offer Reward or Redeem APIs
       summary: Get Cross Selling Coupon
       description: Get details of the cross selling coupon
       parameters:
         - name: id
           in: path
-          description: (Required) (This can be any valid uuidv4 value or publiccoupons _id value)
+          description: (Required) (This needs to be publiccoupons _id value)
           required: true
           schema:
             type: string
@@ -1245,14 +1584,27 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /publiccoupons:
     get:
+      operationId: merchantv2_list_publiccoupons
       tags:
-        - Cross Selling Offer Reward APIs
+        - Cross Selling Offer Reward or Redeem APIs
       summary: Fetch Cross Selling Coupons
-      description: Fetch cross selling coupons based on various filters
+      description: Fetch the partner brand coupons owned by a customer, i.e. the result of Reward Cross Selling Offer or Redeem Cross Selling Offer.
       parameters:
         - name: lead_id
           in: query
@@ -1262,7 +1614,7 @@ paths:
             type: string
         - name: publicoffer_id
           in: query
-          description: (This needs to be publiccoupons offer_id value)
+          description: (This needs to be publiccoupons publicoffer_id value) (Filter coupons generated from a specific partner brand offer)
           schema:
             type: string
         - name: id
@@ -1312,40 +1664,279 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+      security: []
+
+  /actions-checkoutcheckbox:
+    post:
+      tags:
+        - Checkout Redemption APIs
+      operationId: merchantv2_create_checkoutcheckboxactions
+      summary: Checkout Checkbox Redemption
+      description: |-
+        Single step redemption for the checkout checkbox flow, i.e. a "Use my coins" checkbox on the cart or checkout. The discount is always the maximum the customer can get for the cart, there is no step selection.
+
+            - The offer used is the published or active offer with classification action_checkoutcheckbox. If the customer has a membership (or else a tier) and an offer restricted to that membership (or tier) exists, that offer is used instead of the universal one
+            - The discount is capped by the offer fiat_range, the customer's coin balance, the cart amount and the minimum cart configured on the offer
+            - Requires the Checkout Checkbox action to be active on the dashboard, otherwise the API fails
+            - Calls for the same customer are serialised, so concurrent calls from multiple tabs are safe
+
+        Actions
+
+            - list: returns points_balance and a promotions entry describing the discount that can be applied (coin_value to deduct, fiat_value discount, delta_amount payable after discount). If a valid coupon was already generated for this cart amount, it returns that coupon in coupons instead
+            - perform: generates the discount coupon and returns it in coupons. Use coupons[0].value as the discount code on the checkout (it starts with neccbox). The coins are deducted when the order is placed with the code, not at generation. The coupon expires in 24 hours if unused. Calling perform again with the same amount returns the existing coupon, calling it with a different amount cancels the old coupon and generates a new one
+            - revert: cancels the coupon generated earlier (status becomes unavailable and the discount code is removed from the store). Call this when the customer unticks the checkbox or removes the code
+
+        Errors are returned with a message such as "No discount is available" when the cart is below the minimum cart, the customer has no coins, or the offer is not configured.
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required only when calling with a read only storefront api key) (This needs to be the lead_token returned by Get User, valid for 1 hour) (When passed, lead_id and customer_id in the body are ignored and the customer is taken from the token)
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_checkoutcheckboxactions"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  item:
+                    action: <string> (Echo of the action passed, one of list,perform,revert)
+                    points_label: <string> (Label to show next to the balance, ex. Coins)
+                    points_balance: <string> (Current coin balance of the customer)
+                    offers:
+                      - name: <string> (Present for list)
+                        description: <string>
+                    promotions:
+                      - type: <string> (Present for list) (One of flat_discount,percent_discount)
+                        title: <string> (Ready to display title, ex. Get $150 off)
+                        description: <string> (Ready to display description, ex. Redeem 1500 coins)
+                        coin_value: <number> (Coins that will be deducted)
+                        fiat_value: <number> (Discount value, an amount for flat_discount or a percent for percent_discount)
+                        delta_redeemable: <number> (Discount amount in currency)
+                        delta_amount: <number> (Cart amount payable after the discount)
+                        delta_mincoinperstep: <number> (Coins per step as configured on the offer)
+                        delta_minfiatperstep: <number> (Discount per step as configured on the offer)
+                        delta_step: <number> (Number of steps applied)
+                    coupons:
+                      - _id: <uuid> (Present for perform, or for list when a coupon already exists)
+                        value: <string> (Discount code to apply on the checkout, starts with neccbox)
+                        fiat_class: <string> (One of amount,percent)
+                        fiat_value: <number>
+                        status: <string> (issued)
+                        redirect_link: <string> (Checkout link with the discount code applied, when configured)
+                        expire: <string> (ISO date, 24 hours after generation)
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+      security: []
+
+  /actions-checkoutpage:
+    post:
+      tags:
+        - Checkout Redemption APIs
+      operationId: merchantv2_create_checkoutpageactions
+      summary: Checkout Page Redemption
+      description: |-
+        Multi step redemption for the checkout page flow, i.e. a slider or stepper on the checkout where the customer chooses how many coins to redeem.
+
+            - The offer used is the published or active offer with classification action_checkoutpage. If the customer has a membership (or else a tier) and an offer restricted to that membership (or tier) exists, that offer is used instead of the universal one
+            - Each step deducts delta_mincoinperstep coins and gives delta_minfiatperstep discount. delta_step returned by list is the maximum number of steps allowed for this cart, capped by the offer fiat_range, the customer's coin balance, the cart amount and the minimum cart configured on the offer
+            - Pass line_items when the offer is restricted to specific products or collections, the applicable cart amount is then the sum of total_amount of the matching lines (capped by amount). When line_items is omitted the full amount is considered applicable
+            - Requires the Checkout Page action to be active on the dashboard, otherwise the API fails
+            - Calls for the same customer are serialised, so concurrent calls from multiple tabs are safe
+
+        Actions
+
+            - list: returns points_balance and a promotions entry with the maximum discount (coin_value, fiat_value, delta_amount) and the step configuration (delta_mincoinperstep, delta_minfiatperstep, delta_step). Render the slider from 1 to delta_step. If a valid coupon was already generated and still fits the cart, it returns that coupon in coupons instead
+            - perform: requires step. Generates the discount coupon for the chosen step and returns it in coupons. Use coupons[0].value as the discount code on the checkout (it starts with necpage). step greater than delta_step fails with "Steps cannot be greater than allowed steps". The coins are deducted when the order is placed with the code, not at generation. The coupon expires in 24 hours if unused. Calling perform again when an existing coupon still fits the cart returns it, otherwise the old coupon is cancelled and a new one is generated
+            - revert: cancels the coupon generated earlier (status becomes unavailable and the discount code is removed from the store). Call this when the customer resets the slider or removes the code
+
+        Errors are returned with a message such as "No discount is available" when the cart is below the minimum cart, the customer has no coins, or the offer is not configured.
+      parameters:
+        - name: x-source
+          in: header
+          description: (Required) (This can only be one of mobile,unix,web)
+          required: true
+          schema:
+            type: string
+        - name: x-apikey
+          in: header
+          description: (Required) (This needs to be your apikey)
+          required: true
+          schema:
+            type: string
+        - name: x-workspaceid
+          in: header
+          description: (Required) (This needs to be your workspaceid)
+          required: true
+          schema:
+            type: string
+        - name: x-leadtoken
+          in: header
+          description: (Required only when calling with a read only storefront api key) (This needs to be the lead_token returned by Get User, valid for 1 hour) (When passed, lead_id and customer_id in the body are ignored and the customer is taken from the token)
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merchant_create_checkoutpageactions"
+        required: true
+
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  item:
+                    action: <string> (Echo of the action passed, one of list,perform,revert)
+                    points_label: <string> (Label to show next to the balance, ex. Coins)
+                    points_balance: <string> (Current coin balance of the customer)
+                    offers:
+                      - name: <string> (Present for list)
+                        description: <string>
+                    promotions:
+                      - type: <string> (Present for list) (One of flat_discount,percent_discount)
+                        title: <string> (Ready to display title for the maximum discount)
+                        description: <string> (Ready to display description)
+                        coin_value: <number> (Coins deducted at the maximum step)
+                        fiat_value: <number> (Discount at the maximum step, an amount for flat_discount or a percent for percent_discount)
+                        delta_redeemable: <number> (Discount amount in currency at the maximum step)
+                        delta_amount: <number> (Cart amount payable after the maximum discount)
+                        delta_mincoinperstep: <number> (Coins per step, slider increment in coins)
+                        delta_minfiatperstep: <number> (Discount per step, slider increment in currency or percent)
+                        delta_step: <number> (Maximum number of steps allowed for this cart)
+                    coupons:
+                      - _id: <uuid> (Present for perform, or for list when a coupon already exists)
+                        value: <string> (Discount code to apply on the checkout, starts with necpage)
+                        fiat_class: <string> (One of amount,percent)
+                        fiat_value: <number>
+                        status: <string> (issued)
+                        redirect_link: <string> (Checkout link with the discount code applied, when configured)
+                        expire: <string> (ISO date, 24 hours after generation)
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /triggers:
     get:
       tags:
-        - Various Listing APIs
-      summary: Fetch Triggers (Content)
-      description: Fetch triggers (content) based on various filters
+        - Earning, Redemption & Settings Listing APIs
+      operationId: merchantv2_list_triggers
+      summary: Fetch Triggers (Aggregated Earning Rules)
+      description: |-
+        Fetches the aggregated earning rules of your loyalty program, i.e. the triggers through which a customer can earn (signup, purchase, review, referral, birthday, social follows and so on).
+
+            - Only triggers that are active and visible are returned, ordered by their position as configured on the dashboard
+            - Pass content_types to fetch only earn or only social triggers
+            - Pass lead_id to also get activities, the number of times that customer has already completed each trigger (useful to show completed / pending state in the UI)
+            - Triggers of reward_type offer carry the linked offer object so the reward coupon can be rendered without an extra call
+            - Use this API along with Fetch Aggreegated Details (program settings) and Fetch Aggreegated Offers (redemption rules) to render the complete loyalty program on your app or website
+            - Prefer cachefront.nector.io for this call
+
+        Response data contains
+
+            - items: array of triggers (_id, slug, name, content_type, reward_type, rule_type, render_type, reward, rule, content, position, is_open, is_override, offer)
+            - count: total number of matching triggers
+            - activities: array of { trigger_id, count } for the given lead_id (empty array when lead_id is not passed)
       parameters:
         - name: id
           in: query
-          description: (This needs to be triggers _id value)
+          description: (This needs to be triggers _id value) (Fetch a single trigger)
           schema:
             type: string
+        - name: lead_id
+          in: query
+          description: (This needs to be leads _id value) (When passed, activities array in the response contains the completion count of each trigger for this customer)
+          schema:
+            type: string
+        - name: content_types
+          in: query
+          description: (This can only be one of earn,social) (Pass multiple times to include more than one content type, ex. content_types=earn&content_types=social) (Defaults to all)
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - earn
+                - social
         - name: page
           in: query
-          description: (Minimum is 1)
+          description: (Minimum is 1) (Defaults to 1)
           schema:
             type: number
         - name: limit
           in: query
-          description: (Minimum is 1) (Maximum is 100)
+          description: (Minimum is 1) (Maximum is 100) (Defaults to 20)
           schema:
             type: number
-        - name: sort
-          in: query
-          description: (This can only be one of created_at,updated_at)
-          schema:
-            type: string
-        - name: sort_op
-          in: query
-          description: (This can only be one of ASC,DESC)
-          schema:
-            type: string
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
@@ -1354,7 +1945,7 @@ paths:
             type: string
         - name: x-apikey
           in: header
-          description: (Required) (This needs to be your apikey)
+          description: (Required) (This needs to be your apikey) (Read only api key is sufficient)
           required: true
           schema:
             type: string
@@ -1368,20 +1959,84 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  items:
+                    - _id: <uuid>
+                      slug: <string>
+                      name: <string>
+                      content_type: <string> (One of earn,social)
+                      reward_type: <string> (One of wallet,offer,email,sms,rcs,whatsapp,event,webhook)
+                      rule_type: <string>
+                      render_type: <string>
+                      reward: <object> (Reward config, ex. coin_range for wallet reward or offer_id for offer reward)
+                      rule: <object> (Earning rule config, ex. once, onceinaperiod, after_delta_day)
+                      content: <object> (Display content, ex. title, description, icon, action link)
+                      position: <number>
+                      is_open: <boolean>
+                      is_override: <boolean>
+                      offer: <object> (Present only when reward_type is offer)
+                  count: <number>
+                  activities:
+                    - trigger_id: <uuid>
+                      count: <number>
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /aggreegateddetails:
     get:
       tags:
-        - Various Listing APIs
-      summary: Fetch Aggreegated Details
-      description: Fetch the aggreegateddetails of various configs based on tier
+        - Earning, Redemption & Settings Listing APIs
+      operationId: merchantv2_get_aggreegateddetails
+      summary: Fetch Aggreegated Details (Program Settings)
+      description: |-
+        Fetches the complete configuration of your loyalty program in a single call. Call this once when your app or website loads and cache the result on the client.
+
+            - Pass tier and/or membership of the logged in customer (from the leads object) to get the rules applicable to that tier / membership. Pass nothing (or null) for guest users to get the base rules
+            - An unknown tier or membership is silently ignored and the base rules are returned
+            - Response is cached on our side for up to 10 minutes, so changes made on the dashboard can take up to 10 minutes to reflect
+            - Use this API along with Fetch Triggers (earning rules) and Fetch Aggreegated Offers (redemption rules) to render the complete loyalty program
+            - Prefer cachefront.nector.io for this call
+
+        Response data contains
+
+            - businessinfos: your business entity (_id, workspace_id, integration_identifier, name, business_uri, program_name, coin_name, category, country, currency_code, language, quickdeploy_meta, is_freezed, is_running)
+            - websdkinfos: storefront widget and page configs (appconfigs) used by the nector web sdk
+            - planfeatureinfos: plan limits and the features enabled on your plan
+            - featuresettinginfos: same as planfeatureinfos (kept for backward compatibility)
+            - actioninfos: action rules of the program keyed by action, ex. loyalty_action (coin earning and spending ratio), tier_action, membership_action, referral_action, review_action, birthday_action, anniversary_action, gender_action, visitor_action, coinexpiry_action, creditexpiry_action, checkoutcheckbox_action, checkoutpage_action, orderrewardrevert_action, orderspentrevert_action, orderspentcreditrevert_action
+            - integrationinfos: per integration reward rules (identifier, classification, rule_type, rule, status, tier, membership)
+            - tooltrackinfos: third party tools detected on your storefront (counts of *_track stats for the current day)
+            - miscinfos: currencyexchangerate of your business currency against usd
       parameters:
         - name: tier
           in: query
-          description: (This needs to be lead's tier value or null)
+          description: (This needs to be leads tier value or null) (Pass the tier of the logged in customer to get tier specific rules) (Ignored if the tier does not exist)
           schema:
             type: string
+            nullable: true
+        - name: membership
+          in: query
+          description: (This needs to be leads membership value or null) (Pass the membership of the logged in customer to get membership specific rules) (Ignored if the membership does not exist)
+          schema:
+            type: string
+            nullable: true
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
@@ -1390,7 +2045,7 @@ paths:
             type: string
         - name: x-apikey
           in: header
-          description: (Required) (This needs to be your apikey)
+          description: (Required) (This needs to be your apikey) (Read only api key is sufficient)
           required: true
           schema:
             type: string
@@ -1404,20 +2059,104 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  businessinfos:
+                    entity:
+                      _id: <uuid>
+                      workspace_id: <string>
+                      name: <string>
+                      program_name: <string>
+                      coin_name: <string>
+                      country: <string>
+                      currency_code: <string>
+                      language: <string>
+                      is_running: <boolean>
+                  websdkinfos: <object>
+                  planfeatureinfos: <object>
+                  featuresettinginfos: <object>
+                  actioninfos:
+                    loyalty_action: <object>
+                    tier_action: <object>
+                    membership_action: <object>
+                    referral_action: <object>
+                    review_action: <object>
+                    birthday_action: <object>
+                    coinexpiry_action: <object>
+                  integrationinfos: <object>
+                  tooltrackinfos: <object>
+                  miscinfos:
+                    currencyexchangerate: <object>
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /aggreegatedoffers:
     get:
       tags:
-        - Various Listing APIs
-      summary: Fetch Aggreegated Offers
-      description: Fetches the aggreegatedoffers based on tier
+        - Earning, Redemption & Settings Listing APIs
+      operationId: merchantv2_get_aggreegatedoffers
+      summary: Fetch Aggreegated Offers (Aggregated Redemption Rules)
+      description: |-
+        Fetches the aggregated redemption rules of your loyalty program, i.e. the offers against which a customer can redeem their coins (ex. every 100 coins = 10 off, free shipping, free product).
+
+            - Only offers in published or listed status are returned
+            - published: the offer is active and visible, the customer can avail (redeem) it via Offer Reward or Redeem APIs
+            - listed: the offer is visible for display only, it cannot be availed. Use it to show upcoming or locked rewards
+            - Offers in active status are redeemable but hidden, offers in draft status are inactive. Neither is returned by this API
+            - Pass tier and/or membership of the logged in customer (from the leads object) to get the universal offers (no tier / membership restriction) plus the offers restricted to that tier / membership. Pass nothing (or null) for guest users to get only the universal offers
+            - An unknown tier or membership is silently ignored
+            - classification defaults to loyalty. Pass an integration classification (ex. integration_shopifypos) to fetch the offers configured for that integration
+            - Up to 50 offers are returned, ordered by created_at ascending
+            - Response is cached on our side for up to 10 minutes, so changes made on the dashboard can take up to 10 minutes to reflect
+            - Use this API along with Fetch Aggreegated Details (program settings) and Fetch Triggers (earning rules) to render the complete loyalty program
+            - Prefer cachefront.nector.io for this call
+
+        Response data contains
+
+            - businessoffers: your own offers, { items: array of offers (_id, name, description, classification, tier, membership, rule_type, rule, expire_after_day, redirect_link, status, availed, used, view, meta), count }
+            - brandoffers: cross selling offers from partner brands (publicoffers), { items: array of publicoffers, count }
+
+        How to use the offer ids
+
+            - businessoffers items _id is the offer_id to pass to Reward Offer (POST /offerrewards) and Redeem Offer (POST /offerredeems)
+            - brandoffers items _id is the publicoffer_id to pass to Reward Cross Selling Offer (POST /publicofferrewards) and Redeem Cross Selling Offer (POST /publicofferredeems)
+            - For a closed loop loyalty program (customers redeem only against your own brand) read businessoffers only and skip brandoffers
+            - brandoffers is relevant only for an open loop loyalty program where customers can also redeem coins against partner brand offers
       parameters:
         - name: tier
           in: query
-          description: (This needs to be lead's tier value or null)
+          description: (This needs to be leads tier value or null) (Pass the tier of the logged in customer to also get the offers restricted to that tier) (Ignored if the tier does not exist)
           schema:
             type: string
+            nullable: true
+        - name: membership
+          in: query
+          description: (This needs to be leads membership value or null) (Pass the membership of the logged in customer to also get the offers restricted to that membership) (Ignored if the membership does not exist)
+          schema:
+            type: string
+            nullable: true
+        - name: classification
+          in: query
+          description: (This can only be one of loyalty,shopifyfunction_automaticdiscount,integration_shopifypos,integration_logicerp,integration_zwingpos,integration_queuebusterpos,integration_fyndpos,integration_wondersoftpos,integration_custompos,integration_gokwik,integration_razorpay,integration_pragma,integration_fastrr,integration_juspay,integration_shopflo,integration_flexype,integration_cashfree,integration_customcheckout,action_checkoutcheckbox,action_checkoutpage,other) (Defaults to loyalty)
+          schema:
+            type: string
+            nullable: true
         - name: x-source
           in: header
           description: (Required) (This can only be one of mobile,unix,web)
@@ -1426,7 +2165,7 @@ paths:
             type: string
         - name: x-apikey
           in: header
-          description: (Required) (This needs to be your apikey)
+          description: (Required) (This needs to be your apikey) (Read only api key is sufficient)
           required: true
           schema:
             type: string
@@ -1440,14 +2179,56 @@ paths:
       responses:
         "200":
           description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/success"
+              example:
+                meta: {}
+                data:
+                  businessoffers:
+                    items:
+                      - _id: <uuid> (Pass as offer_id to Reward Offer or Redeem Offer)
+                        name: <string>
+                        description: <string>
+                        classification: <string> (Defaults to loyalty)
+                        tier: <string> (null when the offer is not restricted to a tier)
+                        membership: <string> (null when the offer is not restricted to a membership)
+                        rule_type: <string>
+                        rule: <object> (Redemption rule, ex. coin_amount, fiat class and range, minimum cart)
+                        expire_after_day: <number>
+                        redirect_link: <string>
+                        status: <string> (One of published,listed) (Only published offers can be availed)
+                        availed: <number>
+                        used: <number>
+                        view: <number>
+                        meta: <object>
+                    count: <number>
+                  brandoffers:
+                    items:
+                      - _id: <uuid> (Pass as publicoffer_id to Reward Cross Selling Offer or Redeem Cross Selling Offer) (Only for open loop loyalty, skip for closed loop loyalty)
+                    count: <number>
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /leads:
     post:
+      operationId: merchantv2_create_leads
       tags:
         - User APIs
       summary: Create User
-      description: Creates a new customer on nector aginst your business workspace. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      description: Creates a new customer on nector against your business workspace. customer_id is the mapping between your system and nector, store the returned lead _id as well since most APIs accept either of the two. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
       parameters:
         - name: x-source
           in: header
@@ -1477,23 +2258,36 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /leads/{id}:
     put:
+      operationId: merchantv2_update_leads
       tags:
         - User APIs
       summary: Update User
-      description: Update details of the user, it will update properties of the user, if the properties already exists it will not be updated
+      description: Update details of the user. Only properties that are currently empty are set, a property that already has a value is not overwritten.
       parameters:
         - name: customer_id
           in: query
-          description: (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while updating user)
+          description: (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value) (Alternative to the path id. When passed, the user is looked up by customer_id and the path id is ignored)
           schema:
             type: string
         - name: id
           in: path
-          description: (Required) (This needs to be leads _id value) (If need to update user via customer id pass any random uuid v4 value for id)
+          description: (Required) (This needs to be leads _id value) (The path id is always required to keep the API strict. When updating by customer_id instead, pass any placeholder uuidv4 here and pass customer_id in the query, the query value takes precedence)
           required: true
           schema:
             type: string
@@ -1525,37 +2319,50 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
     get:
+      operationId: merchantv2_get_leads
       tags:
         - User APIs
       summary: Get User
-      description: Get details of the user
+      description: Get details of the user including the wallet balance, tier, membership and referral code. Look up by lead _id in the path. To look up by customer_id, referral_code, email or mobile instead, pass any placeholder uuidv4 in the path (the path id is always required to keep the API strict) and pass the lookup key in the query, the query value takes precedence. The response also carries lead_token, a 1 hour token identifying this customer, which the Checkout Redemption APIs accept in the x-leadtoken header so the customer id never has to be exposed to the browser.
       parameters:
         - name: customer_id
           in: query
-          description: (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value) (If this value is passed, it will be given first preference while searching user)
+          description: (Minimum length is 8) (Maximum length is 128) (This needs to be leads customer_id value) (Alternative to the path id. Lookup keys are checked in the order customer_id, referral_code, email, mobile, then the path id)
           schema:
             type: string
         - name: referral_code
           in: query
-          description: (This needs to be leads referral_code value) (If this value is passed, it will be given second preference while searching user)
+          description: (This needs to be leads referral_code value) (Alternative to the path id, checked after customer_id)
           schema:
             type: string
         - name: email
           in: query
-          description: (This needs to be leads email value) (If this value is passed, it will be given third preference while searching user)
+          description: (This needs to be leads email value) (Alternative to the path id, checked after customer_id and referral_code)
           schema:
             type: string
         - name: mobile
           in: query
-          description: (This needs to be leads mobile value) (If this value is passed, it will be given fourth preference while searching user)
+          description: (This needs to be leads mobile value) (Alternative to the path id, checked after customer_id, referral_code and email)
           schema:
             type: string
         - name: id
           in: path
-          description: (Required) (This needs to be leads _id value) (If need to get user via customer id pass any random uuid v4 value for id)
+          description: (Required) (This needs to be leads _id value) (The path id is always required to keep the API strict. When looking up by customer_id, referral_code, email or mobile instead, pass any placeholder uuidv4 here and pass the lookup key in the query, the query value takes precedence)
           required: true
           schema:
             type: string
@@ -1581,14 +2388,27 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /wallettransactions:
     post:
+      operationId: merchantv2_create_wallettransactions
       tags:
         - Wallet Reward APIs
       summary: Create Wallet Transaction
-      description: Create a wallet transaction on behalf of the user. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
+      description: Credit (cr) or debit (dr) coins in the wallet of the user directly. Prefer Reward Using Trigger for earning use cases so that the earning rules configured on the dashboard are applied, use this API for manual adjustments, migrations or custom earning logic that lives in your backend. This API can be called only with full access api key, make sure to call this API only from your backend using full access api key. DO NOT EXPOSE FULL ACCESS API KEY
       parameters:
         - name: x-source
           in: header
@@ -1618,13 +2438,26 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
     get:
+      operationId: merchantv2_list_wallettransactions
       tags:
         - Wallet Reward APIs
       summary: Fetch Wallet Transactions
-      description: Fetch wallet transactions based on various filters
+      description: Fetch the wallet transactions (coin history) of a customer. Pass hash to find the transaction created against your own reference, ex. an order id.
       parameters:
         - name: lead_id
           in: query
@@ -1689,10 +2522,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /wallettransactions/{id}:
     get:
+      operationId: merchantv2_get_wallettransactions
       tags:
         - Wallet Reward APIs
       summary: Get Wallet Transaction
@@ -1732,10 +2578,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /creditwallettransactions:
     post:
+      operationId: merchantv2_create_creditwallettransactions
       tags:
         - Credit Wallet Reward APIs
       summary: Create Credit Wallet Transaction (Limited Access)
@@ -1769,13 +2628,26 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
     get:
+      operationId: merchantv2_list_creditwallettransactions
       tags:
         - Credit Wallet Reward APIs
-      summary: Fetch Credit Wallet Transaction (Limited Access)
-      description: Fetch credit wallet transactions based on various filters
+      summary: Fetch Credit Wallet Transactions (Limited Access)
+      description: Fetch the credit wallet transactions (credit history) of a customer. Pass hash to find the transaction created against your own reference, ex. an order id.
       parameters:
         - name: lead_id
           in: query
@@ -1840,10 +2712,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /creditwallettransactions/{id}:
     get:
+      operationId: merchantv2_get_creditwallettransactions
       tags:
         - Credit Wallet Reward APIs
       summary: Get Credit Wallet Transaction (Limited Access)
@@ -1883,14 +2768,27 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /reviews:
     post:
+      operationId: merchantv2_create_reviews
       tags:
         - Review APIs
       summary: Create Review
-      description: Create review on behalf of the user.
+      description: Create a review on behalf of the user. Pass order_id or reference_order_id to mark it as a verified purchase review. Attach images or videos afterwards using Create Upload. Read only api key is sufficient.
       parameters:
         - name: x-source
           in: header
@@ -1920,9 +2818,22 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
     get:
+      operationId: merchantv2_list_reviews
       tags:
         - Review APIs
       summary: Fetch Reviews
@@ -1940,12 +2851,12 @@ paths:
             type: string
         - name: is_featured
           in: query
-          description: (This needs to be reviews is_featured value)
+          description: (This can only be one of true,false) (Filter reviews marked as featured on the dashboard)
           schema:
             type: string
         - name: is_verified
           in: query
-          description: (This needs to be reviews is_verified value)
+          description: (This can only be one of true,false) (Filter reviews attached to an order, i.e. verified purchase reviews)
           schema:
             type: string
         - name: id
@@ -1995,10 +2906,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /reviews/{id}:
     get:
+      operationId: merchantv2_get_reviews
       tags:
         - Review APIs
       summary: Get Review
@@ -2006,7 +2930,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: (Required) (This needs to be reveiews _id value)
+          description: (Required) (This needs to be reviews _id value)
           required: true
           schema:
             type: string
@@ -2032,10 +2956,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /reviews-count:
     get:
+      operationId: merchantv2_count_reviews
       tags:
         - Review APIs
       summary: Get Review Count
@@ -2073,14 +3010,27 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /qnas:
     post:
+      operationId: merchantv2_create_qnas
       tags:
         - QnA APIs
       summary: Create QnA
-      description: Create qna on behalf of the user.
+      description: Create a product question on behalf of the user. Read only api key is sufficient.
       parameters:
         - name: x-source
           in: header
@@ -2110,9 +3060,22 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
     get:
+      operationId: merchantv2_list_qnas
       tags:
         - QnA APIs
       summary: Fetch QnAs
@@ -2175,10 +3138,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /qnas/{id}:
     get:
+      operationId: merchantv2_get_qnas
       tags:
         - QnA APIs
       summary: Get QnA
@@ -2186,7 +3162,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: (Required) (This needs to be reveiews _id value)
+          description: (Required) (This needs to be qnas _id value)
           required: true
           schema:
             type: string
@@ -2212,10 +3188,23 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /qnas-count:
     get:
+      operationId: merchantv2_count_qnas
       tags:
         - QnA APIs
       summary: Get QnA Count
@@ -2253,14 +3242,27 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
 
   /uploads:
     post:
+      operationId: merchantv2_create_uploads
       tags:
-        - Misc APIs
+        - Upload Image or Video APIs
       summary: Create Upload
-      description: Upload a file against reviews or qnas on behalf of the user.
+      description: Upload an image or video against a review or qna on behalf of the user. Send the request as multipart/form-data with the file in the file field along with parent_id and parent_type.
       parameters:
         - name: x-source
           in: header
@@ -2282,7 +3284,7 @@ paths:
             type: string
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: "#/components/schemas/merchant_create_uploads"
         required: true
@@ -2290,4 +3292,16 @@ paths:
       responses:
         "200":
           description: "200"
+        "4XX":
+          description: Client error. The HTTP status code is one of 400 (validation failed), 401 (api key, workspace id or lead token not valid), 403 (not allowed), 404 (not found), 422 (business rule failed, read data.message), 428 (another request for the same customer is in progress, retry after a moment), 429 (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "5XX":
+          description: Unexpected error on our side. Retry with backoff and share meta.request_id with support@nector.io if it persists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
       security: []
